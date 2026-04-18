@@ -1,19 +1,1312 @@
-<!doctype html>
-<html>
-	<head>
-		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width" />
-		<title>My static Space</title>
-		<link rel="stylesheet" href="style.css" />
-	</head>
-	<body>
-		<div class="card">
-			<h1>Welcome to your static Space!</h1>
-			<p>You can modify this app directly by editing <i>index.html</i> in the Files and versions tab.</p>
-			<p>
-				Also don't forget to check the
-				<a href="https://huggingface.co/docs/hub/spaces" target="_blank">Spaces documentation</a>.
-			</p>
-		</div>
-	</body>
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nexus Business Pro</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            nexus: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              200: '#c7d2fe',
+              300: '#a5b4fc',
+              400: '#818cf8',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+              800: '#3730a3',
+              900: '#312e81',
+            },
+            surface: {
+              50: '#f8fafc',
+              100: '#f1f5f9',
+              200: '#e2e8f0',
+              300: '#cbd5e1',
+              700: '#1e293b',
+              800: '#0f172a',
+              900: '#020617',
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #4f46e5; border-radius: 10px; }
+    .sidebar-link.active { background: linear-gradient(135deg, #6366f1, #4f46e5); color: white; box-shadow: 0 4px 15px rgba(99,102,241,0.4); }
+    .sidebar-link:not(.active):hover { background: rgba(99,102,241,0.1); }
+    .dark .sidebar-link:not(.active):hover { background: rgba(99,102,241,0.15); }
+    .kpi-card { transition: all 0.3s ease; }
+    .kpi-card:hover { transform: translateY(-4px); box-shadow: 0 20px 40px rgba(0,0,0,0.15); }
+    .dark .kpi-card:hover { box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+    .page { display: none; }
+    .page.active { display: block; }
+    .fade-in { animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes pulse-ring { 0% { transform: scale(0.8); opacity: 1; } 100% { transform: scale(1.4); opacity: 0; } }
+    .notification-badge { animation: pulse-ring 1.5s ease infinite; }
+    .task-card { transition: all 0.2s ease; cursor: grab; }
+    .task-card:hover { transform: scale(1.02); }
+    .task-card:active { cursor: grabbing; }
+    .kanban-col { min-height: 200px; }
+    .cal-day:hover { background: rgba(99,102,241,0.15); }
+    .cal-day.today { background: linear-gradient(135deg, #6366f1, #4f46e5); color: white; border-radius: 12px; }
+    .msg-bubble { max-width: 75%; }
+    .mobile-sidebar { transform: translateX(-100%); transition: transform 0.3s ease; }
+    .mobile-sidebar.open { transform: translateX(0); }
+    .overlay { opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+    .overlay.open { opacity: 1; pointer-events: auto; }
+    input:focus, textarea:focus, select:focus { outline: none; border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,0.2); }
+    .progress-bar { transition: width 1s ease; }
+    .avatar-ring { padding: 2px; background: linear-gradient(135deg, #6366f1, #ec4899); border-radius: 50%; }
+  </style>
+</head>
+<body class="bg-surface-50 dark:bg-surface-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
+
+  <!-- Overlay for mobile -->
+  <div id="overlay" class="overlay fixed inset-0 bg-black/50 z-40 lg:hidden" onclick="toggleMobileSidebar()"></div>
+
+  <!-- SIDEBAR -->
+  <aside id="sidebar" class="mobile-sidebar lg:translate-x-0 fixed top-0 left-0 h-full w-64 bg-white dark:bg-surface-800 border-r border-gray-200 dark:border-surface-700 z-50 flex flex-col transition-all duration-300">
+    <!-- Logo -->
+    <div class="p-6 flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-nexus-500 to-nexus-700 flex items-center justify-center shadow-lg shadow-nexus-500/30">
+        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+      </div>
+      <div>
+        <h1 class="text-lg font-bold bg-gradient-to-r from-nexus-600 to-nexus-400 bg-clip-text text-transparent">Nexus Pro</h1>
+        <p class="text-[10px] uppercase tracking-widest text-gray-400 font-semibold">Business Suite</p>
+      </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+      <a href="#" class="sidebar-link active flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all" data-page="dashboard" onclick="switchPage('dashboard', this)">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zM14 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"/></svg>
+        Dashboard
+      </a>
+      <a href="#" class="sidebar-link flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-400 transition-all" data-page="projects" onclick="switchPage('projects', this)">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+        Projects
+      </a>
+      <a href="#" class="sidebar-link flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-400 transition-all" data-page="team" onclick="switchPage('team', this)">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+        Team
+      </a>
+      <a href="#" class="sidebar-link flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-400 transition-all" data-page="analytics" onclick="switchPage('analytics', this)">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+        Analytics
+      </a>
+      <a href="#" class="sidebar-link flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-400 transition-all" data-page="calendar" onclick="switchPage('calendar', this)">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+        Calendar
+      </a>
+      <a href="#" class="sidebar-link flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-400 transition-all" data-page="messages" onclick="switchPage('messages', this)">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+        Messages
+        <span class="ml-auto bg-nexus-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">5</span>
+      </a>
+      <a href="#" class="sidebar-link flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-400 transition-all" data-page="settings" onclick="switchPage('settings', this)">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3"/></svg>
+        Settings
+      </a>
+    </nav>
+
+    <!-- User Profile -->
+    <div class="p-4 border-t border-gray-200 dark:border-surface-700">
+      <div class="flex items-center gap-3">
+        <div class="avatar-ring">
+          <img src="http://static.photos/people/200x200/42" class="w-9 h-9 rounded-full object-cover" alt="User">
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="text-sm font-semibold truncate">Alex Morgan</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400 truncate">CEO & Founder</p>
+        </div>
+        <button class="text-gray-400 hover:text-red-500 transition-colors">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <div class="lg:ml-64 min-h-screen flex flex-col">
+    <!-- Top Bar -->
+    <header class="sticky top-0 bg-white/80 dark:bg-surface-800/80 backdrop-blur-xl border-b border-gray-200 dark:border-surface-700 z-30 px-4 lg:px-8 py-3">
+      <div class="flex items-center gap-4">
+        <button class="lg:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-surface-700" onclick="toggleMobileSidebar()">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
+        <!-- Search -->
+        <div class="flex-1 max-w-md relative">
+          <svg class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          <input type="text" placeholder="Search anything..." class="w-full pl-10 pr-4 py-2 bg-gray-100 dark:bg-surface-700 rounded-xl text-sm border border-transparent focus:border-nexus-500 focus:bg-white dark:focus:bg-surface-800 transition-all">
+        </div>
+        <div class="flex items-center gap-2">
+          <!-- Theme Toggle -->
+          <button id="themeToggle" class="p-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-surface-700 transition-colors" onclick="toggleTheme()">
+            <svg class="w-5 h-5 dark:hidden" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.354 5.354A9 9 0 018.646 20.354 9.003 9.003 0 0012 3a9 9 0 008.354 2.354z"/></svg>
+            <svg class="w-5 h-5 hidden dark:block" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+          </button>
+          <!-- Notifications -->
+          <button class="p-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-surface-700 transition-colors relative">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+            <span class="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 rounded-full notification-badge"></span>
+          </button>
+          <!-- Profile -->
+          <div class="hidden sm:flex items-center gap-2 pl-2 border-l border-gray-200 dark:border-surface-700 ml-1">
+            <img src="http://static.photos/people/200x200/42" class="w-8 h-8 rounded-full object-cover ring-2 ring-nexus-500/30" alt="User">
+            <div class="hidden md:block">
+              <p class="text-sm font-semibold">Alex Morgan</p>
+              <p class="text-[10px] text-gray-500">Premium Plan</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Page Content -->
+    <main class="flex-1 p-4 lg:p-8">
+
+      <!-- ==================== DASHBOARD ==================== -->
+      <div id="page-dashboard" class="page active fade-in">
+        <!-- Welcome -->
+        <div class="mb-8">
+          <h2 class="text-2xl lg:text-3xl font-bold">Good morning, Alex! 👋</h2>
+          <p class="text-gray-500 dark:text-gray-400 mt-1">Here's what's happening with your business today.</p>
+        </div>
+
+        <!-- KPI Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 lg:gap-6 mb-8">
+          <div class="kpi-card bg-white dark:bg-surface-800 rounded-2xl p-6 border border-gray-100 dark:border-surface-700">
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-12 h-12 rounded-xl bg-nexus-100 dark:bg-nexus-900/30 flex items-center justify-center">
+                <svg class="w-6 h-6 text-nexus-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              </div>
+              <span class="text-xs font-semibold text-green-600 bg-green-100 dark:bg-green-900/30 dark:text-green-400 px-2.5 py-1 rounded-full">+24.5%</span>
+            </div>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">Total Revenue</p>
+            <p class="text-2xl font-bold">$84,254</p>
+            <div class="mt-3 h-1 bg-gray-100 dark:bg-surface-700 rounded-full"><div class="progress-bar h-1 bg-gradient-to-r from-nexus-500 to-nexus-400 rounded-full" style="width:78%"></div></div>
+          </div>
+          <div class="kpi-card bg-white dark:bg-surface-800 rounded-2xl p-6 border border-gray-100 dark:border-surface-700">
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
+                <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+              </div>
+              <span class="text-xs font-semibold text-green-600 bg-green-100 dark:bg-green-900/30 dark:text-green-400 px-2.5 py-1 rounded-full">+12.3%</span>
+            </div>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">Active Users</p>
+            <p class="text-2xl font-bold">14,582</p>
+            <div class="mt-3 h-1 bg-gray-100 dark:bg-surface-700 rounded-full"><div class="progress-bar h-1 bg-gradient-to-r from-emerald-500 to-emerald-400 rounded-full" style="width:65%"></div></div>
+          </div>
+          <div class="kpi-card bg-white dark:bg-surface-800 rounded-2xl p-6 border border-gray-100 dark:border-surface-700">
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-12 h-12 rounded-xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
+                <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
+              </div>
+              <span class="text-xs font-semibold text-amber-600 bg-amber-100 dark:bg-amber-900/30 dark:text-amber-400 px-2.5 py-1 rounded-full">+8.1%</span>
+            </div>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">Active Projects</p>
+            <p class="text-2xl font-bold">48</p>
+            <div class="mt-3 h-1 bg-gray-100 dark:bg-surface-700 rounded-full"><div class="progress-bar h-1 bg-gradient-to-r from-amber-500 to-amber-400 rounded-full" style="width:48%"></div></div>
+          </div>
+          <div class="kpi-card bg-white dark:bg-surface-800 rounded-2xl p-6 border border-gray-100 dark:border-surface-700">
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-12 h-12 rounded-xl bg-rose-100 dark:bg-rose-900/30 flex items-center justify-center">
+                <svg class="w-6 h-6 text-rose-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+              </div>
+              <span class="text-xs font-semibold text-rose-600 bg-rose-100 dark:bg-rose-900/30 dark:text-rose-400 px-2.5 py-1 rounded-full">+32.7%</span>
+            </div>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">Conversion Rate</p>
+            <p class="text-2xl font-bold">5.24%</p>
+            <div class="mt-3 h-1 bg-gray-100 dark:bg-surface-700 rounded-full"><div class="progress-bar h-1 bg-gradient-to-r from-rose-500 to-rose-400 rounded-full" style="width:52%"></div></div>
+          </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="grid grid-cols-1 xl:grid-cols-3 gap-4 lg:gap-6 mb-8">
+          <div class="xl:col-span-2 bg-white dark:bg-surface-800 rounded-2xl p-6 border border-gray-100 dark:border-surface-700">
+            <div class="flex items-center justify-between mb-6">
+              <div>
+                <h3 class="text-lg font-bold">Revenue Overview</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Monthly revenue and expenses</p>
+              </div>
+              <select class="text-sm bg-gray-100 dark:bg-surface-700 px-3 py-1.5 rounded-lg border-0">
+                <option>This Year</option>
+                <option>Last Year</option>
+              </select>
+            </div>
+            <canvas id="revenueChart" height="260"></canvas>
+          </div>
+          <div class="bg-white dark:bg-surface-800 rounded-2xl p-6 border border-gray-100 dark:border-surface-700">
+            <div class="flex items-center justify-between mb-6">
+              <div>
+                <h3 class="text-lg font-bold">Revenue by Category</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Distribution breakdown</p>
+              </div>
+            </div>
+            <canvas id="categoryChart" height="260"></canvas>
+          </div>
+        </div>
+
+        <!-- Recent Activity & Tasks -->
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-4 lg:gap-6">
+          <!-- Recent Activity -->
+          <div class="bg-white dark:bg-surface-800 rounded-2xl p-6 border border-gray-100 dark:border-surface-700">
+            <h3 class="text-lg font-bold mb-4">Recent Activity</h3>
+            <div class="space-y-4">
+              <div class="flex items-start gap-3">
+                <div class="w-10 h-10 rounded-full bg-nexus-100 dark:bg-nexus-900/30 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <svg class="w-5 h-5 text-nexus-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm font-medium">Project "Nexus Rebrand" completed</p>
+                  <p class="text-xs text-gray-500 dark:text-gray-400">2 minutes ago</p>
+                </div>
+                <span class="text-xs font-semibold text-green-600 bg-green-100 dark:bg-green-900/30 dark:text-green-400 px-2 py-0.5 rounded-full flex-shrink-0">Done</span>
+              </div>
+              <div class="flex items-start gap-3">
+                <div class="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/></svg>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm font-medium">Budget alert: Marketing spend at 92%</p>
+                  <p class="text-xs text-gray-500 dark:text-gray-400">15 minutes ago</p>
+                </div>
+                <span class="text-xs font-semibold text-amber-600 bg-amber-100 dark:bg-amber-900/30 dark:text-amber-400 px-2 py-0.5 rounded-full flex-shrink-0">Alert</span>
+              </div>
+              <div class="flex items-start gap-3">
+                <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm font-medium">New team member: Sarah Chen joined Design</p>
+                  <p class="text-xs text-gray-500 dark:text-gray-400">1 hour ago</p>
+                </div>
+                <span class="text-xs font-semibold text-blue-600 bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 px-2 py-0.5 rounded-full flex-shrink-0">New</span>
+              </div>
+              <div class="flex items-start gap-3">
+                <div class="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm font-medium">Client proposal for "Acme Corp" approved</p>
+                  <p class="text-xs text-gray-500 dark:text-gray-400">3 hours ago</p>
+                </div>
+                <span class="text-xs font-semibold text-emerald-600 bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400 px-2 py-0.5 rounded-full flex-shrink-0">Approved</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Upcoming Tasks -->
+          <div class="bg-white dark:bg-surface-800 rounded-2xl p-6 border border-gray-100 dark:border-surface-700">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-lg font-bold">Upcoming Tasks</h3>
+              <button class="text-sm text-nexus-600 font-semibold hover:text-nexus-700">View All</button>
+            </div>
+            <div class="space-y-3">
+              <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-surface-700/50 hover:bg-gray-100 dark:hover:bg-surface-700 transition-colors">
+                <input type="checkbox" class="w-4 h-4 rounded border-gray-300 text-nexus-600 focus:ring-nexus-500">
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm font-medium">Review Q4 financial report</p>
+                  <p class="text-xs text-gray-500 dark:text-gray-400">Due: Today</p>
+                </div>
+                <span class="w-2.5 h-2.5 rounded-full bg-red-500 flex-shrink-0"></span>
+              </div>
+              <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-surface-700/50 hover:bg-gray-100 dark:hover:bg-surface-700 transition-colors">
+                <input type="checkbox" class="w-4 h-4 rounded border-gray-300 text-nexus-600 focus:ring-nexus-500">
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm font-medium">Prepare investor presentation</p>
+                  <p class="text-xs text-gray-500 dark:text-gray-400">Due: Tomorrow</p>
+                </div>
+                <span class="w-2.5 h-2.5 rounded-full bg-amber-500 flex-shrink-0"></span>
+              </div>
+              <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-surface-700/50 hover:bg-gray-100 dark:hover:bg-surface-700 transition-colors">
+                <input type="checkbox" class="w-4 h-4 rounded border-gray-300 text-nexus-600 focus:ring-nexus-500">
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm font-medium">Update team OKRs for next quarter</p>
+                  <p class="text-xs text-gray-500 dark:text-gray-400">Due: Dec 20</p>
+                </div>
+                <span class="w-2.5 h-2.5 rounded-full bg-nexus-500 flex-shrink-0"></span>
+              </div>
+              <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-surface-700/50 hover:bg-gray-100 dark:hover:bg-surface-700 transition-colors">
+                <input type="checkbox" checked class="w-4 h-4 rounded border-gray-300 text-nexus-600 focus:ring-nexus-500">
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm font-medium line-through text-gray-400">Onboard new design team members</p>
+                  <p class="text-xs text-gray-400">Completed</p>
+                </div>
+                <span class="w-2.5 h-2.5 rounded-full bg-green-500 flex-shrink-0"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== PROJECTS ==================== -->
+      <div id="page-projects" class="page fade-in">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
+          <div>
+            <h2 class="text-2xl lg:text-3xl font-bold">Projects</h2>
+            <p class="text-gray-500 dark:text-gray-400 mt-1">Manage and track your active projects.</p>
+          </div>
+          <button class="bg-nexus-600 hover:bg-nexus-700 text-white px-4 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-2 transition-colors shadow-lg shadow-nexus-500/20">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"/></svg>
+            New Project
+          </button>
+        </div>
+
+        <!-- Kanban Board -->
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 lg:gap-6">
+          <!-- To Do -->
+          <div class="kanban-col">
+            <div class="flex items-center gap-2 mb-4">
+              <span class="w-3 h-3 rounded-full bg-gray-400"></span>
+              <h3 class="font-semibold text-sm uppercase tracking-wider">To Do</h3>
+              <span class="ml-auto text-xs font-bold text-gray-500 bg-gray-100 dark:bg-surface-700 px-2 py-0.5 rounded-full">3</span>
+            </div>
+            <div class="space-y-3">
+              <div class="task-card bg-white dark:bg-surface-800 rounded-xl p-4 border border-gray-100 dark:border-surface-700 shadow-sm">
+                <span class="text-[10px] font-bold uppercase tracking-wider text-nexus-600 bg-nexus-100 dark:bg-nexus-900/30 px-2 py-0.5 rounded-full">Design</span>
+                <h4 class="text-sm font-semibold mt-2 mb-1">Mobile App UI Redesign</h4>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">Update the mobile app interface with new design system.</p>
+                <div class="flex items-center justify-between">
+                  <div class="flex -space-x-2">
+                    <img src="http://static.photos/people/200x200/10" class="w-6 h-6 rounded-full border-2 border-white dark:border-surface-800 object-cover">
+                    <img src="http://static.photos/people/200x200/22" class="w-6 h-6 rounded-full border-2 border-white dark:border-surface-800 object-cover">
+                  </div>
+                  <span class="text-[10px] text-gray-500">Dec 25</span>
+                </div>
+              </div>
+              <div class="task-card bg-white dark:bg-surface-800 rounded-xl p-4 border border-gray-100 dark:border-surface-700 shadow-sm">
+                <span class="text-[10px] font-bold uppercase tracking-wider text-amber-600 bg-amber-100 dark:bg-amber-900/30 px-2 py-0.5 rounded-full">Marketing</span>
+                <h4 class="text-sm font-semibold mt-2 mb-1">Q1 Campaign Strategy</h4>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">Plan and outline the Q1 marketing campaigns.</p>
+                <div class="flex items-center justify-between">
+                  <div class="flex -space-x-2">
+                    <img src="http://static.photos/people/200x200/55" class="w-6 h-6 rounded-full border-2 border-white dark:border-surface-800 object-cover">
+                  </div>
+                  <span class="text-[10px] text-gray-500">Jan 5</span>
+                </div>
+              </div>
+              <div class="task-card bg-white dark:bg-surface-800 rounded-xl p-4 border border-gray-100 dark:border-surface-700 shadow-sm">
+                <span class="text-[10px] font-bold uppercase tracking-wider text-rose-600 bg-rose-100 dark:bg-rose-900/30 px-2 py-0.5 rounded-full">Urgent</span>
+                <h4 class="text-sm font-semibold mt-2 mb-1">Security Audit</h4>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">Complete security audit for all production systems.</p>
+                <div class="flex items-center justify-between">
+                  <div class="flex -space-x-2">
+                    <img src="http://static.photos/people/200x200/88" class="w-6 h-6 rounded-full border-2 border-white dark:border-surface-800 object-cover">
+                    <img src="http://static.photos/people/200x200/12" class="w-6 h-6 rounded-full border-2 border-white dark:border-surface-800 object-cover">
+                    <img src="http://static.photos/people/200x200/33" class="w-6 h-6 rounded-full border-2 border-white dark:border-surface-800 object-cover">
+                  </div>
+                  <span class="text-[10px] text-gray-500">Dec 18</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- In Progress -->
+          <div class="kanban-col">
+            <div class="flex items-center gap-2 mb-4">
+              <span class="w-3 h-3 rounded-full bg-nexus-500"></span>
+              <h3 class="font-semibold text-sm uppercase tracking-wider">In Progress</h3>
+              <span class="ml-auto text-xs font-bold text-gray-500 bg-gray-100 dark:bg-surface-700 px-2 py-0.5 rounded-full">2</span>
+            </div>
+            <div class="space-y-3">
+              <div class="task-card bg-white dark:bg-surface-800 rounded-xl p-4 border border-gray-100 dark:border-surface-700 shadow-sm border-l-4 border-l-nexus-500">
+                <span class="text-[10px] font-bold uppercase tracking-wider text-blue-600 bg-blue-100 dark:bg-blue-900/30 px-2 py-0.5 rounded-full">Dev</span>
+                <h4 class="text-sm font-semibold mt-2 mb-1">API Integration v2.0</h4>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">Migrate all API endpoints to new architecture.</p>
+                <div class="w-full bg-gray-100 dark:bg-surface-700 rounded-full h-1.5 mb-3"><div class="bg-nexus-500 h-1.5 rounded-full" style="width:65%"></div></div>
+                <div class="flex items-center justify-between">
+                  <div class="flex -space-x-2">
+                    <img src="http://static.photos/people/200x200/44" class="w-6 h-6 rounded-full border-2 border-white dark:border-surface-800 object-cover">
+                    <img src="http://static.photos/people/200x200/77" class="w-6 h-6 rounded-full border-2 border-white dark:border-surface-800 object-cover">
+                  </div>
+                  <span class="text-[10px] text-nexus-600 font-semibold">65%</span>
+                </div>
+              </div>
+              <div class="task-card bg-white dark:bg-surface-800 rounded-xl p-4 border border-gray-100 dark:border-surface-700 shadow-sm border-l-4 border-l-nexus-500">
+                <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-600 bg-emerald-100 dark:bg-emerald-900/30 px-2 py-0.5 rounded-full">Content</span>
+                <h4 class="text-sm font-semibold mt-2 mb-1">Blog Content Revamp</h4>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">Rewrite and update 24 blog articles with SEO optimization.</p>
+                <div class="w-full bg-gray-100 dark:bg-surface-700 rounded-full h-1.5 mb-3"><div class="bg-emerald-500 h-1.5 rounded-full" style="width:40%"></div></div>
+                <div class="flex items-center justify-between">
+                  <div class="flex -space-x-2">
+                    <img src="http://static.photos/people/200x200/66" class="w-6 h-6 rounded-full border-2 border-white dark:border-surface-800 object-cover">
+                  </div>
+                  <span class="text-[10px] text-emerald-600 font-semibold">40%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Review -->
+          <div class="kanban-col">
+            <div class="flex items-center gap-2 mb-4">
+              <span class="w-3 h-3 rounded-full bg-amber-500"></span>
+              <h3 class="font-semibold text-sm uppercase tracking-wider">Review</h3>
+              <span class="ml-auto text-xs font-bold text-gray-500 bg-gray-100 dark:bg-surface-700 px-2 py-0.5 rounded-full">2</span>
+            </div>
+            <div class="space-y-3">
+              <div class="task-card bg-white dark:bg-surface-800 rounded-xl p-4 border border-gray-100 dark:border-surface-700 shadow-sm">
+                <span class="text-[10px] font-bold uppercase tracking-wider text-purple-600 bg-purple-100 dark:bg-purple-900/30 px-2 py-0.5 rounded-full">Research</span>
+                <h4 class="text-sm font-semibold mt-2 mb-1">Market Analysis Report</h4>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">Final review of competitive market analysis.</p>
+                <div class="flex items-center justify-between">
+                  <div class="flex -space-x-2">
+                    <img src="http://static.photos/people/200x200/28" class="w-6 h-6 rounded-full border-2 border-white dark:border-surface-800 object-cover">
+                  </div>
+                  <span class="text-[10px] text-gray-500">Dec 15</span>
+                </div>
+              </div>
+              <div class="task-card bg-white dark:bg-surface-800 rounded-xl p-4 border border-gray-100 dark:border-surface-700 shadow-sm">
+                <span class="text-[10px] font-bold uppercase tracking-wider text-nexus-600 bg-nexus-100 dark:bg-nexus-900/30 px-2 py-0.5 rounded-full">Design</span>
+                <h4 class="text-sm font-semibold mt-2 mb-1">Brand Guidelines v3</h4>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">Review updated brand guidelines document.</p>
+                <div class="flex items-center justify-between">
+                  <div class="flex -space-x-2">
+                    <img src="http://static.photos/people/200x200/50" class="w-6 h-6 rounded-full border-2 border-white dark:border-surface-800 object-cover">
+                    <img src="http://static.photos/people/200x200/62" class="w-6 h-6 rounded-full border-2 border-white dark:border-surface-800 object-cover">
+                  </div>
+                  <span class="text-[10px] text-gray-500">Dec 16</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Done -->
+          <div class="kanban-col">
+            <div class="flex items-center gap-2 mb-4">
+              <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
+              <h3 class="font-semibold text-sm uppercase tracking-wider">Done</h3>
+              <span class="ml-auto text-xs font-bold text-gray-500 bg-gray-100 dark:bg-surface-700 px-2 py-0.5 rounded-full">2</span>
+            </div>
+            <div class="space-y-3">
+              <div class="task-card bg-white dark:bg-surface-800 rounded-xl p-4 border border-gray-100 dark:border-surface-700 shadow-sm opacity-75">
+                <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-600 bg-emerald-100 dark:bg-emerald-900/30 px-2 py-0.5 rounded-full">Dev</span>
+                <h4 class="text-sm font-semibold mt-2 mb-1 line-through">Database Migration</h4>
+                <p class="text-xs text-gray-400 mb-3">Migrate legacy database to cloud infrastructure.</p>
+                <div class="flex items-center justify-between">
+                  <div class="flex -space-x-2">
+                    <img src="http://static.photos/people/200x200/15" class="w-6 h-6 rounded-full border-2 border-white dark:border-surface-800 object-cover">
+                  </div>
+                  <span class="text-[10px] text-emerald-500 font-semibold">✓ Complete</span>
+                </div>
+              </div>
+              <div class="task-card bg-white dark:bg-surface-800 rounded-xl p-4 border border-gray-100 dark:border-surface-700 shadow-sm opacity-75">
+                <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-600 bg-emerald-100 dark:bg-emerald-900/30 px-2 py-0.5 rounded-full">Design</span>
+                <h4 class="text-sm font-semibold mt-2 mb-1 line-through">Landing Page Design</h4>
+                <p class="text-xs text-gray-400 mb-3">Design and develop new responsive landing page.</p>
+                <div class="flex items-center justify-between">
+                  <div class="flex -space-x-2">
+                    <img src="http://static.photos/people/200x200/90" class="w-6 h-6 rounded-full border-2 border-white dark:border-surface-800 object-cover">
+                  </div>
+                  <span class="text-[10px] text-emerald-500 font-semibold">✓ Complete</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== TEAM ==================== -->
+      <div id="page-team" class="page fade-in">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
+          <div>
+            <h2 class="text-2xl lg:text-3xl font-bold">Team Members</h2>
+            <p class="text-gray-500 dark:text-gray-400 mt-1">Manage your team and their roles.</p>
+          </div>
+          <button class="bg-nexus-600 hover:bg-nexus-700 text-white px-4 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-2 transition-colors shadow-lg shadow-nexus-500/20">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
+            Add Member
+          </button>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-6">
+          <!-- Team Member Cards -->
+          <div class="bg-white dark:bg-surface-800 rounded-2xl p-6 border border-gray-100 dark:border-surface-700 hover:shadow-lg transition-shadow">
+            <div class="flex items-center gap-4 mb-4">
+              <div class="avatar-ring"><img src="http://static.photos/people/200x200/42" class="w-14 h-14 rounded-full object-cover" alt="Alex"></div>
+              <div>
+                <h4 class="font-bold">Alex Morgan</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">CEO & Founder</p>
+              </div>
+            </div>
+            <div class="flex flex-wrap gap-1.5 mb-4">
+              <span class="text-[10px] font-semibold bg-nexus-100 dark:bg-nexus-900/30 text-nexus-700 dark:text-nexus-300 px-2 py-0.5 rounded-full">Leadership</span>
+              <span class="text-[10px] font-semibold bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 px-2 py-0.5 rounded-full">Strategy</span>
+            </div>
+            <div class="flex items-center justify-between text-sm">
+              <span class="text-gray-500 dark:text-gray-400">12 projects</span>
+              <div class="flex -space-x-1">
+                <span class="w-6 h-6 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center"><svg class="w-3 h-3 text-green-600" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="6"/></svg></span>
+              </div>
+            </div>
+          </div>
+          <div class="bg-white dark:bg-surface-800 rounded-2xl p-6 border border-gray-100 dark:border-surface-700 hover:shadow-lg transition-shadow">
+            <div class="flex items-center gap-4 mb-4">
+              <div class="avatar-ring"><img src="http://static.photos/people/200x200/55" class="w-14 h-14 rounded-full object-cover" alt="Sarah"></div>
+              <div>
+                <h4 class="font-bold">Sarah Chen</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Lead Designer</p>
+              </div>
+            </div>
+            <div class="flex flex-wrap gap-1.5 mb-4">
+              <span class="text-[10px] font-semibold bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 px-2 py-0.5 rounded-full">UI/UX</span>
+              <span class="text-[10px] font-semibold bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 px-2 py-0.5 rounded-full">Figma</span>
+            </div>
+            <div class="flex items-center justify-between text-sm">
+              <span class="text-gray-500 dark:text-gray-400">8 projects</span>
+              <div class="flex -space-x-1">
+                <span class="w-6 h-6 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center"><svg class="w-3 h-3 text-green-600" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="6"/></svg></span>
+              </div>
+            </div>
+          </div>
+          <div class="bg-white dark:bg-surface-800 rounded-2xl p-6 border border-gray-100 dark:border-surface-700 hover:shadow-lg transition-shadow">
+            <div class="flex items-center gap-4 mb-4">
+              <div class="avatar-ring"><img src="http://static.photos/people/200x200/77" class="w-14 h-14 rounded-full object-cover" alt="Marcus"></div>
+              <div>
+                <h4 class="font-bold">Marcus Williams</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Senior Developer</p>
+              </div>
+            </div>
+            <div class="flex flex-wrap gap-1.5 mb-4">
+              <span class="text-[10px] font-semibold bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-full">React</span>
+              <span class="text-[10px] font-semibold bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded-full">Node.js</span>
+            </div>
+            <div class="flex items-center justify-between text-sm">
+              <span class="text-gray-500 dark:text-gray-400">15 projects</span>
+              <div class="flex -space-x-1">
+                <span class="w-6 h-6 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center"><svg class="w-3 h-3 text-green-600" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="6"/></svg></span>
+              </div>
+            </div>
+          </div>
+          <div class="bg-white dark:bg-surface-800 rounded-2xl p-6 border border-gray-100 dark:border-surface-700 hover:shadow-lg transition-shadow">
+            <div class="flex items-center gap-4 mb-4">
+              <div class="avatar-ring"><img src="http://static.photos/people/200x200/22" class="w-14 h-14 rounded-full object-cover" alt="Emma"></div>
+              <div>
+                <h4 class="font-bold">Emma Rodriguez</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Marketing Director</p>
+              </div>
+            </div>
+            <div class="flex flex-wrap gap-1.5 mb-4">
+              <span class="text-[10px] font-semibold bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-300 px-2 py-0.5 rounded-full">Growth</span>
+              <span class="text-[10px] font-semibold bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 px-2 py-0.5 rounded-full">SEO</span>
+            </div>
+            <div class="flex items-center justify-between text-sm">
+              <span class="text-gray-500 dark:text-gray-400">6 projects</span>
+              <div class="flex -space-x-1">
+                <span class="w-6 h-6 rounded-full bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center"><svg class="w-3 h-3 text-yellow-600" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="6"/></svg></span>
+              </div>
+            </div>
+          </div>
+          <div class="bg-white dark:bg-surface-800 rounded-2xl p-6 border border-gray-100 dark:border-surface-700 hover:shadow-lg transition-shadow">
+            <div class="flex items-center gap-4 mb-4">
+              <div class="avatar-ring"><img src="http://static.photos/people/200x200/88" class="w-14 h-14 rounded-full object-cover" alt="David"></div>
+              <div>
+                <h4 class="font-bold">David Park</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">DevOps Engineer</p>
+              </div>
+            </div>
+            <div class="flex flex-wrap gap-1.5 mb-4">
+              <span class="text-[10px] font-semibold bg-cyan-100 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-300 px-2 py-0.5 rounded-full">AWS</span>
+              <span class="text-[10px] font-semibold bg-gray-100 dark:bg-gray-900/30 text-gray-700 dark:text-gray-300 px-2 py-0.5 rounded-full">Docker</span>
+            </div>
+            <div class="flex items-center justify-between text-sm">
+              <span class="text-gray-500 dark:text-gray-400">9 projects</span>
+              <div class="flex -space-x-1">
+                <span class="w-6 h-6 rounded-full bg-gray-100 dark:bg-gray-900/30 flex items-center justify-center"><svg class="w-3 h-3 text-gray-400" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="6"/></svg></span>
+              </div>
+            </div>
+          </div>
+          <div class="bg-white dark:bg-surface-800 rounded-2xl p-6 border border-gray-100 dark:border-surface-700 hover:shadow-lg transition-shadow">
+            <div class="flex items-center gap-4 mb-4">
+              <div class="avatar-ring"><img src="http://static.photos/people/200x200/66" class="w-14 h-14 rounded-full object-cover" alt="Lisa"></div>
+              <div>
+                <h4 class="font-bold">Lisa Thompson</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Product Manager</p>
+              </div>
+            </div>
+            <div class="flex flex-wrap gap-1.5 mb-4">
+              <span class="text-[10px] font-semibold bg-nexus-100 dark:bg-nexus-900/30 text-nexus-700 dark:text-nexus-300 px-2 py-0.5 rounded-full">Agile</span>
+              <span class="text-[10px] font-semibold bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded-full">Scrum</span>
+            </div>
+            <div class="flex items-center justify-between text-sm">
+              <span class="text-gray-500 dark:text-gray-400">10 projects</span>
+              <div class="flex -space-x-1">
+                <span class="w-6 h-6 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center"><svg class="w-3 h-3 text-green-600" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="6"/></svg></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== ANALYTICS ==================== -->
+      <div id="page-analytics" class="page fade-in">
+        <div class="mb-8">
+          <h2 class="text-2xl lg:text-3xl font-bold">Analytics</h2>
+          <p class="text-gray-500 dark:text-gray-400 mt-1">Deep dive into your business performance metrics.</p>
+        </div>
+        <!-- Analytics KPIs -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <div class="bg-gradient-to-br from-nexus-500 to-nexus-700 rounded-2xl p-5 text-white">
+            <p class="text-xs opacity-80 mb-1">Page Views</p>
+            <p class="text-2xl font-bold">2.4M</p>
+            <p class="text-xs mt-2 opacity-70">+18.2% vs last month</p>
+          </div>
+          <div class="bg-gradient-to-br from-emerald-500 to-emerald-700 rounded-2xl p-5 text-white">
+            <p class="text-xs opacity-80 mb-1">Bounce Rate</p>
+            <p class="text-2xl font-bold">24.8%</p>
+            <p class="text-xs mt-2 opacity-70">-3.1% vs last month</p>
+          </div>
+          <div class="bg-gradient-to-br from-amber-500 to-amber-700 rounded-2xl p-5 text-white">
+            <p class="text-xs opacity-80 mb-1">Avg. Session</p>
+            <p class="text-2xl font-bold">4m 32s</p>
+            <p class="text-xs mt-2 opacity-70">+12s vs last month</p>
+          </div>
+          <div class="bg-gradient-to-br from-rose-500 to-rose-700 rounded-2xl p-5 text-white">
+            <p class="text-xs opacity-80 mb-1">Conversion</p>
+            <p class="text-2xl font-bold">5.24%</p>
+            <p class="text-xs mt-2 opacity-70">+0.8% vs last month</p>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-4 lg:gap-6 mb-8">
+          <div class="bg-white dark:bg-surface-800 rounded-2xl p-6 border border-gray-100 dark:border-surface-700">
+            <h3 class="font-bold mb-4">Traffic Sources</h3>
+            <canvas id="trafficChart" height="250"></canvas>
+          </div>
+          <div class="bg-white dark:bg-surface-800 rounded-2xl p-6 border border-gray-100 dark:border-surface-700">
+            <h3 class="font-bold mb-4">Weekly Performance</h3>
+            <canvas id="weeklyChart" height="250"></canvas>
+          </div>
+        </div>
+        <!-- Top Products Table -->
+        <div class="bg-white dark:bg-surface-800 rounded-2xl p-6 border border-gray-100 dark:border-surface-700">
+          <h3 class="font-bold mb-4">Top Products</h3>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="border-b border-gray-100 dark:border-surface-700">
+                  <th class="text-left py-3 px-4 font-semibold text-gray-500 dark:text-gray-400">Product</th>
+                  <th class="text-left py-3 px-4 font-semibold text-gray-500 dark:text-gray-400">Sales</th>
+                  <th class="text-left py-3 px-4 font-semibold text-gray-500 dark:text-gray-400">Revenue</th>
+                  <th class="text-left py-3 px-4 font-semibold text-gray-500 dark:text-gray-400">Growth</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="border-b border-gray-50 dark:border-surface-700 hover:bg-gray-50 dark:hover:bg-surface-700/50">
+                  <td class="py-3 px-4 font-medium">Nexus Pro Suite</td>
+                  <td class="py-3 px-4">2,847</td>
+                  <td class="py-3 px-4">$284,700</td>
+                  <td class="py-3 px-4"><span class="text-green-600 font-semibold">+24%</span></td>
+                </tr>
+                <tr class="border-b border-gray-50 dark:border-surface-700 hover:bg-gray-50 dark:hover:bg-surface-700/50">
+                  <td class="py-3 px-4 font-medium">CloudSync Platform</td>
+                  <td class="py-3 px-4">1,932</td>
+                  <td class="py-3 px-4">$193,200</td>
+                  <td class="py-3 px-4"><span class="text-green-600 font-semibold">+18%</span></td>
+                </tr>
+                <tr class="border-b border-gray-50 dark:border-surface-700 hover:bg-gray-50 dark:hover:bg-surface-700/50">
+                  <td class="py-3 px-4 font-medium">DataVault Security</td>
+                  <td class="py-3 px-4">1,456</td>
+                  <td class="py-3 px-4">$145,600</td>
+                  <td class="py-3 px-4"><span class="text-green-600 font-semibold">+12%</span></td>
+                </tr>
+                <tr class="hover:bg-gray-50 dark:hover:bg-surface-700/50">
+                  <td class="py-3 px-4 font-medium">SmartAnalytics AI</td>
+                  <td class="py-3 px-4">982</td>
+                  <td class="py-3 px-4">$98,200</td>
+                  <td class="py-3 px-4"><span class="text-amber-600 font-semibold">+5%</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== CALENDAR ==================== -->
+      <div id="page-calendar" class="page fade-in">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
+          <div>
+            <h2 class="text-2xl lg:text-3xl font-bold">Calendar</h2>
+            <p class="text-gray-500 dark:text-gray-400 mt-1">Schedule and manage your events.</p>
+          </div>
+          <button onclick="openEventModal()" class="bg-nexus-600 hover:bg-nexus-700 text-white px-4 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-2 transition-colors shadow-lg shadow-nexus-500/20">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"/></svg>
+            Add Event
+          </button>
+        </div>
+        <div class="bg-white dark:bg-surface-800 rounded-2xl border border-gray-100 dark:border-surface-700 overflow-hidden">
+          <!-- Calendar Header -->
+          <div class="flex items-center justify-between p-6 border-b border-gray-100 dark:border-surface-700">
+            <button onclick="changeMonth(-1)" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-surface-700 transition-colors">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg>
+            </button>
+            <h3 id="calMonthYear" class="text-lg font-bold"></h3>
+            <button onclick="changeMonth(1)" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-surface-700 transition-colors">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+            </button>
+          </div>
+          <!-- Calendar Grid -->
+          <div class="grid grid-cols-7 text-center">
+            <div class="py-3 text-xs font-semibold text-gray-500 dark:text-gray-400">Sun</div>
+            <div class="py-3 text-xs font-semibold text-gray-500 dark:text-gray-400">Mon</div>
+            <div class="py-3 text-xs font-semibold text-gray-500 dark:text-gray-400">Tue</div>
+            <div class="py-3 text-xs font-semibold text-gray-500 dark:text-gray-400">Wed</div>
+            <div class="py-3 text-xs font-semibold text-gray-500 dark:text-gray-400">Thu</div>
+            <div class="py-3 text-xs font-semibold text-gray-500 dark:text-gray-400">Fri</div>
+            <div class="py-3 text-xs font-semibold text-gray-500 dark:text-gray-400">Sat</div>
+          </div>
+          <div id="calGrid" class="grid grid-cols-7 border-t border-gray-100 dark:border-surface-700"></div>
+        </div>
+        <!-- Upcoming Events -->
+        <div class="mt-6 bg-white dark:bg-surface-800 rounded-2xl p-6 border border-gray-100 dark:border-surface-700">
+          <h3 class="font-bold mb-4">Upcoming Events</h3>
+          <div class="space-y-3" id="eventsList"></div>
+        </div>
+      </div>
+
+      <!-- ==================== MESSAGES ==================== -->
+      <div id="page-messages" class="page fade-in">
+        <div class="mb-8">
+          <h2 class="text-2xl lg:text-3xl font-bold">Messages</h2>
+          <p class="text-gray-500 dark:text-gray-400 mt-1">Stay connected with your team.</p>
+        </div>
+        <div class="bg-white dark:bg-surface-800 rounded-2xl border border-gray-100 dark:border-surface-700 overflow-hidden flex flex-col md:flex-row" style="height:600px;">
+          <!-- Contacts -->
+          <div class="w-full md:w-80 border-b md:border-b-0 md:border-r border-gray-100 dark:border-surface-700 flex flex-col">
+            <div class="p-4 border-b border-gray-100 dark:border-surface-700">
+              <div class="relative">
+                <svg class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                <input type="text" placeholder="Search contacts..." class="w-full pl-10 pr-4 py-2 bg-gray-100 dark:bg-surface-700 rounded-xl text-sm border-0">
+              </div>
+            </div>
+            <div class="flex-1 overflow-y-auto" id="contactsList"></div>
+          </div>
+          <!-- Chat -->
+          <div class="flex-1 flex flex-col">
+            <div class="p-4 border-b border-gray-100 dark:border-surface-700 flex items-center gap-3" id="chatHeader">
+              <img src="http://static.photos/people/200x200/55" class="w-10 h-10 rounded-full object-cover" alt="">
+              <div>
+                <p class="font-semibold text-sm">Sarah Chen</p>
+                <p class="text-xs text-green-500">Online</p>
+              </div>
+            </div>
+            <div class="flex-1 overflow-y-auto p-4 space-y-4" id="chatMessages">
+              <div class="flex justify-start"><div class="msg-bubble bg-gray-100 dark:bg-surface-700 rounded-2xl rounded-bl-md px-4 py-2.5"><p class="text-sm">Hey Alex! How's the new project coming along? 🚀</p><span class="text-[10px] text-gray-400 mt-1 block">10:30 AM</span></div></div>
+              <div class="flex justify-end"><div class="msg-bubble bg-nexus-600 text-white rounded-2xl rounded-br-md px-4 py-2.5"><p class="text-sm">Going great! We just hit the 80% milestone on the API migration. 💪</p><span class="text-[10px] text-nexus-200 mt-1 block">10:32 AM</span></div></div>
+              <div class="flex justify-start"><div class="msg-bubble bg-gray-100 dark:bg-surface-700 rounded-2xl rounded-bl-md px-4 py-2.5"><p class="text-sm">That's awesome! The client will be thrilled. When can we demo it?</p><span class="text-[10px] text-gray-400 mt-1 block">10:35 AM</span></div></div>
+              <div class="flex justify-end"><div class="msg-bubble bg-nexus-600 text-white rounded-2xl rounded-br-md px-4 py-2.5"><p class="text-sm">How about Friday at 2 PM? I'll prepare a full walkthrough.</p><span class="text-[10px] text-nexus-200 mt-1 block">10:37 AM</span></div></div>
+              <div class="flex justify-start"><div class="msg-bubble bg-gray-100 dark:bg-surface-700 rounded-2xl rounded-bl-md px-4 py-2.5"><p class="text-sm">Perfect! I'll set up the meeting. Should I invite the whole team? 🤔</p><span class="text-[10px] text-gray-400 mt-1 block">10:40 AM</span></div></div>
+              <div class="flex justify-end"><div class="msg-bubble bg-nexus-600 text-white rounded-2xl rounded-br-md px-4 py-2.5"><p class="text-sm">Yes, let's get everyone on the same page. See you Friday! ✨</p><span class="text-[10px] text-nexus-200 mt-1 block">10:42 AM</span></div></div>
+            </div>
+            <div class="p-4 border-t border-gray-100 dark:border-surface-700">
+              <div class="flex items-center gap-2">
+                <button class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-surface-700 transition-colors">
+                  <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>
+                </button>
+                <input id="msgInput" type="text" placeholder="Type a message..." class="flex-1 bg-gray-100 dark:bg-surface-700 rounded-xl px-4 py-2.5 text-sm border-0" onkeydown="if(event.key==='Enter')sendMessage()">
+                <button onclick="sendMessage()" class="bg-nexus-600 hover:bg-nexus-700 text-white p-2.5 rounded-xl transition-colors">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== SETTINGS ==================== -->
+      <div id="page-settings" class="page fade-in">
+        <div class="mb-8">
+          <h2 class="text-2xl lg:text-3xl font-bold">Settings</h2>
+          <p class="text-gray-500 dark:text-gray-400 mt-1">Manage your account and preferences.</p>
+        </div>
+        <div class="max-w-2xl space-y-6">
+          <!-- Profile -->
+          <div class="bg-white dark:bg-surface-800 rounded-2xl p-6 border border-gray-100 dark:border-surface-700">
+            <h3 class="font-bold mb-4">Profile Information</h3>
+            <div class="flex items-center gap-4 mb-6">
+              <div class="avatar-ring"><img src="http://static.photos/people/200x200/42" class="w-16 h-16 rounded-full object-cover" alt="User"></div>
+              <div>
+                <button class="bg-nexus-600 hover:bg-nexus-700 text-white text-sm px-4 py-2 rounded-lg transition-colors">Change Avatar</button>
+              </div>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium mb-1">First Name</label>
+                <input type="text" value="Alex" class="w-full px-4 py-2.5 bg-gray-50 dark:bg-surface-700 rounded-xl text-sm border border-gray-200 dark:border-surface-600">
+              </div>
+              <div>
+                <label class="block text-sm font-medium mb-1">Last Name</label>
+                <input type="text" value="Morgan" class="w-full px-4 py-2.5 bg-gray-50 dark:bg-surface-700 rounded-xl text-sm border border-gray-200 dark:border-surface-600">
+              </div>
+              <div>
+                <label class="block text-sm font-medium mb-1">Email</label>
+                <input type="email" value="alex@nexuspro.com" class="w-full px-4 py-2.5 bg-gray-50 dark:bg-surface-700 rounded-xl text-sm border border-gray-200 dark:border-surface-600">
+              </div>
+              <div>
+                <label class="block text-sm font-medium mb-1">Phone</label>
+                <input type="text" value="+1 (555) 123-4567" class="w-full px-4 py-2.5 bg-gray-50 dark:bg-surface-700 rounded-xl text-sm border border-gray-200 dark:border-surface-600">
+              </div>
+            </div>
+            <button class="mt-4 bg-nexus-600 hover:bg-nexus-700 text-white px-6 py-2.5 rounded-xl text-sm font-semibold transition-colors">Save Changes</button>
+          </div>
+          <!-- Notifications -->
+          <div class="bg-white dark:bg-surface-800 rounded-2xl p-6 border border-gray-100 dark:border-surface-700">
+            <h3 class="font-bold mb-4">Notifications</h3>
+            <div class="space-y-4">
+              <label class="flex items-center justify-between cursor-pointer">
+                <div>
+                  <p class="text-sm font-medium">Email Notifications</p>
+                  <p class="text-xs text-gray-500 dark:text-gray-400">Receive updates via email</p>
+                </div>
+                <input type="checkbox" checked class="w-11 h-6 bg-gray-200 rounded-full relative cursor-pointer appearance-none checked:bg-nexus-600 transition-colors after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-transform checked:after:translate-x-5">
+              </label>
+              <label class="flex items-center justify-between cursor-pointer">
+                <div>
+                  <p class="text-sm font-medium">Push Notifications</p>
+                  <p class="text-xs text-gray-500 dark:text-gray-400">Receive push notifications on mobile</p>
+                </div>
+                <input type="checkbox" class="w-11 h-6 bg-gray-200 rounded-full relative cursor-pointer appearance-none checked:bg-nexus-600 transition-colors after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-transform checked:after:translate-x-5">
+              </label>
+              <label class="flex items-center justify-between cursor-pointer">
+                <div>
+                  <p class="text-sm font-medium">Weekly Digest</p>
+                  <p class="text-xs text-gray-500 dark:text-gray-400">Get a weekly summary of activity</p>
+                </div>
+                <input type="checkbox" checked class="w-11 h-6 bg-gray-200 rounded-full relative cursor-pointer appearance-none checked:bg-nexus-600 transition-colors after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-transform checked:after:translate-x-5">
+              </label>
+            </div>
+          </div>
+          <!-- Appearance -->
+          <div class="bg-white dark:bg-surface-800 rounded-2xl p-6 border border-gray-100 dark:border-surface-700">
+            <h3 class="font-bold mb-4">Appearance</h3>
+            <div class="flex gap-3">
+              <button onclick="setTheme('light')" class="flex-1 p-4 rounded-xl border-2 border-gray-200 dark:border-surface-600 hover:border-nexus-500 transition-colors text-center">
+                <svg class="w-6 h-6 mx-auto mb-2 text-amber-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+                <p class="text-sm font-medium">Light</p>
+              </button>
+              <button onclick="setTheme('dark')" class="flex-1 p-4 rounded-xl border-2 border-gray-200 dark:border-surface-600 hover:border-nexus-500 transition-colors text-center">
+                <svg class="w-6 h-6 mx-auto mb-2 text-nexus-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.354 5.354A9 9 0 018.646 20.354 9.003 9.003 0 0012 3a9 9 0 008.354 2.354z"/></svg>
+                <p class="text-sm font-medium">Dark</p>
+              </button>
+              <button onclick="setTheme('system')" class="flex-1 p-4 rounded-xl border-2 border-gray-200 dark:border-surface-600 hover:border-nexus-500 transition-colors text-center">
+                <svg class="w-6 h-6 mx-auto mb-2 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                <p class="text-sm font-medium">System</p>
+              </button>
+            </div>
+          </div>
+          <!-- Danger Zone -->
+          <div class="bg-white dark:bg-surface-800 rounded-2xl p-6 border border-red-200 dark:border-red-900/30">
+            <h3 class="font-bold text-red-600 mb-2">Danger Zone</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Irreversible and destructive actions</p>
+            <div class="flex gap-3">
+              <button class="px-4 py-2 rounded-xl text-sm font-semibold border border-red-300 dark:border-red-800 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">Delete Account</button>
+              <button class="px-4 py-2 rounded-xl text-sm font-semibold border border-gray-300 dark:border-surface-600 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-surface-700 transition-colors">Export Data</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Event Modal -->
+  <div id="eventModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 opacity-0 pointer-events-none transition-all duration-300">
+    <div class="absolute inset-0 bg-black/50" onclick="closeEventModal()"></div>
+    <div class="relative bg-white dark:bg-surface-800 rounded-2xl p-6 w-full max-w-md shadow-2xl transform scale-95 transition-transform duration-300">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="font-bold text-lg">Add Event</h3>
+        <button onclick="closeEventModal()" class="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-surface-700">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium mb-1">Event Title</label>
+          <input id="eventTitle" type="text" placeholder="Enter event title..." class="w-full px-4 py-2.5 bg-gray-50 dark:bg-surface-700 rounded-xl text-sm border border-gray-200 dark:border-surface-600">
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium mb-1">Date</label>
+            <input id="eventDate" type="date" class="w-full px-4 py-2.5 bg-gray-50 dark:bg-surface-700 rounded-xl text-sm border border-gray-200 dark:border-surface-600">
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Time</label>
+            <input id="eventTime" type="time" class="w-full px-4 py-2.5 bg-gray-50 dark:bg-surface-700 rounded-xl text-sm border border-gray-200 dark:border-surface-600">
+          </div>
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Color</label>
+          <div class="flex gap-2" id="colorPicker">
+            <button onclick="selectColor('#6366f1')" class="w-8 h-8 rounded-full bg-nexus-500 ring-2 ring-nexus-300 ring-offset-2 dark:ring-offset-surface-800 transition-all"></button>
+            <button onclick="selectColor('#10b981')" class="w-8 h-8 rounded-full bg-emerald-500 ring-0 ring-emerald-300 ring-offset-2 dark:ring-offset-surface-800 transition-all"></button>
+            <button onclick="selectColor('#f59e0b')" class="w-8 h-8 rounded-full bg-amber-500 ring-0 ring-amber-300 ring-offset-2 dark:ring-offset-surface-800 transition-all"></button>
+            <button onclick="selectColor('#ef4444')" class="w-8 h-8 rounded-full bg-red-500 ring-0 ring-red-300 ring-offset-2 dark:ring-offset-surface-800 transition-all"></button>
+            <button onclick="selectColor('#ec4899')" class="w-8 h-8 rounded-full bg-pink-500 ring-0 ring-pink-300 ring-offset-2 dark:ring-offset-surface-800 transition-all"></button>
+          </div>
+        </div>
+        <button onclick="addEvent()" class="w-full bg-nexus-600 hover:bg-nexus-700 text-white py-2.5 rounded-xl text-sm font-semibold transition-colors">Add Event</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    // ===================== NAVIGATION =====================
+    function switchPage(pageId, el) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.sidebar-link').forEach(l => {
+        l.classList.remove('active');
+        l.classList.add('text-gray-600', 'dark:text-gray-400');
+      });
+      const page = document.getElementById('page-' + pageId);
+      if (page) {
+        page.classList.add('active');
+        page.classList.remove('fade-in');
+        void page.offsetWidth;
+        page.classList.add('fade-in');
+      }
+      if (el) {
+        el.classList.add('active');
+        el.classList.remove('text-gray-600', 'dark:text-gray-400');
+      }
+      // Close mobile sidebar
+      if (window.innerWidth < 1024) toggleMobileSidebar();
+    }
+
+    // ===================== THEME =====================
+    function toggleTheme() {
+      document.documentElement.classList.toggle('dark');
+    }
+    function setTheme(theme) {
+      if (theme === 'dark') document.documentElement.classList.add('dark');
+      else if (theme === 'light') document.documentElement.classList.remove('dark');
+      else {
+        if (window.matchMedia('(prefers-color-scheme: dark)').matches) document.documentElement.classList.add('dark');
+        else document.documentElement.classList.remove('dark');
+      }
+    }
+
+    // ===================== MOBILE SIDEBAR =====================
+    function toggleMobileSidebar() {
+      document.getElementById('sidebar').classList.toggle('open');
+      document.getElementById('overlay').classList.toggle('open');
+    }
+
+    // ===================== CHARTS =====================
+    const chartDefaults = {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { labels: { font: { family: 'Inter', size: 12 }, usePointStyle: true, padding: 16 } } },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { family: 'Inter', size: 11 } } },
+        y: { grid: { color: 'rgba(148,163,184,0.1)' }, ticks: { font: { family: 'Inter', size: 11 } } }
+      }
+    };
+
+    // Revenue Chart
+    const revCtx = document.getElementById('revenueChart').getContext('2d');
+    const revGrad = revCtx.createLinearGradient(0, 0, 0, 260);
+    revGrad.addColorStop(0, 'rgba(99,102,241,0.3)');
+    revGrad.addColorStop(1, 'rgba(99,102,241,0.0)');
+    const expGrad = revCtx.createLinearGradient(0, 0, 0, 260);
+    expGrad.addColorStop(0, 'rgba(239,68,68,0.15)');
+    expGrad.addColorStop(1, 'rgba(239,68,68,0.0)');
+
+    new Chart(revCtx, {
+      type: 'line',
+      data: {
+        labels: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+        datasets: [{
+          label: 'Revenue',
+          data: [30000,35000,32000,45000,42000,55000,58000,52000,65000,72000,78000,84254],
+          borderColor: '#6366f1',
+          backgroundColor: revGrad,
+          fill: true,
+          tension: 0.4,
+          pointRadius: 0,
+          pointHoverRadius: 6,
+          borderWidth: 2.5
+        },{
+          label: 'Expenses',
+          data: [20000,22000,24000,28000,26000,32000,34000,30000,36000,38000,40000,42000],
+          borderColor: '#ef4444',
+          backgroundColor: expGrad,
+          fill: true,
+          tension: 0.4,
+          pointRadius: 0,
+          pointHoverRadius: 6,
+          borderWidth: 2.5
+        }]
+      },
+      options: { ...chartDefaults, plugins: { ...chartDefaults.plugins } }
+    });
+
+    // Category Chart
+    new Chart(document.getElementById('categoryChart'), {
+      type: 'doughnut',
+      data: {
+        labels: ['SaaS', 'Consulting', 'Licensing', 'Support', 'Training'],
+        datasets: [{
+          data: [42, 22, 15, 13, 8],
+          backgroundColor: ['#6366f1','#10b981','#f59e0b','#ef4444','#8b5cf6'],
+          borderWidth: 0,
+          hoverOffset: 8
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '68%',
+        plugins: {
+          legend: { position: 'bottom', labels: { font: { family: 'Inter', size: 11 }, usePointStyle: true, padding: 12 } }
+        }
+      }
+    });
+
+    // Traffic Chart (Analytics page)
+    let trafficChart, weeklyChart;
+    function initAnalyticsCharts() {
+      if (trafficChart) return;
+      trafficChart = new Chart(document.getElementById('trafficChart'), {
+        type: 'bar',
+        data: {
+          labels: ['Organic','Direct','Social','Referral','Email','Paid'],
+          datasets: [{
+            label: 'Visitors',
+            data: [45000,28000,18000,12000,8000,15000],
+            backgroundColor: ['#6366f1','#10b981','#f59e0b','#ec4899','#8b5cf6','#06b6d4'],
+            borderRadius: 8,
+            barThickness: 32
+          }]
+        },
+        options: { ...chartDefaults, plugins: { legend: { display: false } } }
+      });
+      weeklyChart = new Chart(document.getElementById('weeklyChart'), {
+        type: 'line',
+        data: {
+          labels: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+          datasets: [{
+            label: 'This Week',
+            data: [3200,4100,3800,4600,5200,2800,2200],
+            borderColor: '#6366f1',
+            backgroundColor: 'rgba(99,102,241,0.1)',
+            fill: true,
+            tension: 0.4,
+            pointRadius: 4,
+            borderWidth: 2.5
+          },{
+            label: 'Last Week',
+            data: [2800,3500,3200,3800,4200,2400,1900],
+            borderColor: '#94a3b8',
+            borderDash: [5,5],
+            fill: false,
+            tension: 0.4,
+            pointRadius: 3,
+            borderWidth: 2
+          }]
+        },
+        options: chartDefaults
+      });
+    }
+
+    // Observe analytics page to init charts
+    const analyticsObserver = new MutationObserver(() => {
+      if (document.getElementById('page-analytics').classList.contains('active')) initAnalyticsCharts();
+    });
+    analyticsObserver.observe(document.getElementById('page-analytics'), { attributes: true, attributeFilter: ['class'] });
+
+    // ===================== CALENDAR =====================
+    let calDate = new Date();
+    let calEvents = [
+      { title: 'Team Standup', date: formatDate(new Date()), time: '09:00', color: '#6366f1' },
+      { title: 'Client Meeting', date: formatDate(new Date(Date.now() + 86400000 * 2)), time: '14:00', color: '#10b981' },
+      { title: 'Sprint Review', date: formatDate(new Date(Date.now() + 86400000 * 5)), time: '11:00', color: '#f59e0b' },
+      { title: 'Product Launch', date: formatDate(new Date(Date.now() + 86400000 * 8)), time: '10:00', color: '#ef4444' },
+    ];
+    let selectedEventColor = '#6366f1';
+
+    function formatDate(d) {
+      return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+    }
+
+    function renderCalendar() {
+      const year = calDate.getFullYear();
+      const month = calDate.getMonth();
+      const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+      document.getElementById('calMonthYear').textContent = months[month] + ' ' + year;
+
+      const firstDay = new Date(year, month, 1).getDay();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      const today = new Date();
+      const grid = document.getElementById('calGrid');
+      grid.innerHTML = '';
+
+      // Empty cells for days before start
+      for (let i = 0; i < firstDay; i++) {
+        grid.innerHTML += '<div class="p-2 min-h-[60px]"></div>';
+      }
+
+      for (let d = 1; d <= daysInMonth; d++) {
+        const dateStr = year + '-' + String(month+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+        const isToday = (d === today.getDate() && month === today.getMonth() && year === today.getFullYear());
+        const dayEvents = calEvents.filter(e => e.date === dateStr);
+        let eventsHtml = dayEvents.slice(0,2).map(e => `<div class="text-[10px] truncate px-1 rounded text-white" style="background:${e.color}">${e.title}</div>`).join('');
+        if (dayEvents.length > 2) eventsHtml += `<div class="text-[10px] text-gray-500">+${dayEvents.length-2} more</div>`;
+
+        grid.innerHTML += `
+          <div class="cal-day p-1.5 min-h-[60px] border-t border-r border-gray-100 dark:border-surface-700 ${isToday ? 'today' : ''} cursor-pointer transition-colors">
+            <span class="text-xs font-semibold ${isToday ? 'text-white' : ''}">${d}</span>
+            <div class="mt-0.5 space-y-0.5">${eventsHtml}</div>
+          </div>`;
+      }
+      renderEventsList();
+    }
+
+    function renderEventsList() {
+      const list = document.getElementById('eventsList');
+      const sorted = [...calEvents].sort((a,b) => a.date.localeCompare(b.date));
+      list.innerHTML = sorted.map(e => `
+        <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-surface-700/50">
+          <div class="w-1 h-10 rounded-full flex-shrink-0" style="background:${e.color}"></div>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-semibold">${e.title}</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400">${e.date} at ${e.time}</p>
+          </div>
+          <button onclick="deleteEvent('${e.title}','${e.date}')" class="text-gray-400 hover:text-red-500 transition-colors">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+          </button>
+        </div>`).join('');
+    }
+
+    function changeMonth(delta) {
+      calDate.setMonth(calDate.getMonth() + delta);
+      renderCalendar();
+    }
+
+    function openEventModal() {
+      const modal = document.getElementById('eventModal');
+      modal.classList.remove('opacity-0','pointer-events-none');
+      modal.querySelector('.relative').classList.remove('scale-95');
+      modal.querySelector('.relative').classList.add('scale-100');
+      document.getElementById('eventDate').value = formatDate(new Date());
+    }
+
+    function closeEventModal() {
+      const modal = document.getElementById('eventModal');
+      modal.classList.add('opacity-0','pointer-events-none');
+      modal.querySelector('.relative').classList.add('scale-95');
+      modal.querySelector('.relative').classList.remove('scale-100');
+    }
+
+    function selectColor(color) {
+      selectedEventColor = color;
+      document.querySelectorAll('#colorPicker button').forEach(b => b.classList.replace('ring-2','ring-0'));
+      event.target.classList.replace('ring-0','ring-2');
+    }
+
+    function addEvent() {
+      const title = document.getElementById('eventTitle').value;
+      const date = document.getElementById('eventDate').value;
+      const time = document.getElementById('eventTime').value;
+      if (!title || !date) return;
+      calEvents.push({ title, date, time: time || '09:00', color: selectedEventColor });
+      document.getElementById('eventTitle').value = '';
+      closeEventModal();
+      renderCalendar();
+    }
+
+    function deleteEvent(title, date) {
+      calEvents = calEvents.filter(e => !(e.title === title && e.date === date));
+      renderCalendar();
+    }
+
+    renderCalendar();
+
+    // ===================== MESSAGES =====================
+    const contacts = [
+      { name: 'Sarah Chen', img: 55, status: 'online', last: 'Perfect! See you Friday! ✨' },
+      { name: 'Marcus Williams', img: 77, status: 'online', last: 'PR has been merged 🎉' },
+      { name: 'Emma Rodriguez', img: 22, status: 'away', last: 'Campaign results are in' },
+      { name: 'David Park', img: 88, status: 'offline', last: 'Server deployment complete' },
+      { name: 'Lisa Thompson', img: 66, status: 'online', last: 'Sprint planning tomorrow' },
+    ];
+
+    function renderContacts() {
+      document.getElementById('contactsList').innerHTML = contacts.map(c => `
+        <div class="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-surface-700/50 cursor-pointer transition-colors border-b border-gray-50 dark:border-surface-700/50 last:border-0">
+          <div class="relative flex-shrink-0">
+            <img src="http://static.photos/people/200x200/${c.img}" class="w-10 h-10 rounded-full object-cover" alt="${c.name}">
+            <span class="absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white dark:border-surface-800 ${c.status === 'online' ? 'bg-green-500' : c.status === 'away' ? 'bg-yellow-500' : 'bg-gray-400'}"></span>
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-semibold truncate">${c.name}</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 truncate">${c.last}</p>
+          </div>
+        </div>`).join('');
+    }
+
+    function sendMessage() {
+      const input = document.getElementById('msgInput');
+      const text = input.value.trim();
+      if (!text) return;
+      const chat = document.getElementById('chatMessages');
+      const now = new Date();
+      const time = now.getHours() + ':' + String(now.getMinutes()).padStart(2,'0') + (now.getHours() >= 12 ? ' PM' : ' AM');
+      chat.innerHTML += `
+        <div class="flex justify-end fade-in">
+          <div class="msg-bubble bg-nexus-600 text-white rounded-2xl rounded-br-md px-4 py-2.5">
+            <p class="text-sm">${text}</p>
+            <span class="text-[10px] text-nexus-200 mt-1 block">${time}</span>
+          </div>
+        </div>`;
+      input.value = '';
+      chat.scrollTop = chat.scrollHeight;
+
+      // Simulate reply
+      setTimeout(() => {
+        const replies = ["That's great to hear! 👍", "I'll look into it right away.", "Sure thing! Let me check.", "Awesome, thanks for the update! 🎉", "Got it, will follow up shortly."];
+        const reply = replies[Math.floor(Math.random() * replies.length)];
+        chat.innerHTML += `
+          <div class="flex justify-start fade-in">
+            <div class="msg-bubble bg-gray-100 dark:bg-surface-700 rounded-2xl rounded-bl-md px-4 py-2.5">
+              <p class="text-sm">${reply}</p>
+              <span class="text-[10px] text-gray-400 mt-1 block">${time}</span>
+            </div>
+          </div>`;
+        chat.scrollTop = chat.scrollHeight;
+      }, 1500);
+    }
+
+    renderContacts();
+
+    // ===================== LUCIDE ICONS =====================
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+
+    // ===================== GREETING =====================
+    function updateGreeting() {
+      const hour = new Date().getHours();
+      let greeting = 'Good morning';
+      if (hour >= 12 && hour < 17) greeting = 'Good afternoon';
+      else if (hour >= 17) greeting = 'Good evening';
+      const h2 = document.querySelector('#page-dashboard h2');
+      if (h2) h2.textContent = greeting + ', Alex! 👋';
+    }
+    updateGreeting();
+  </script>
+<script src="https://deepsite.hf.co/deepsite-badge.js"></script>
+</body>
 </html>

@@ -1,10 +1,13 @@
 ---
-title: Nexus Business Pro 3htsx
-emoji: 🦀
-colorFrom: green
-colorTo: indigo
+title: Nexus Business Pro 🏢
+colorFrom: red
+colorTo: purple
 sdk: static
-pinned: false
+emoji: 📦
+tags:
+  - deepsite-v4
 ---
 
-Check out the configuration reference at https://huggingface.co/docs/hub/spaces-config-reference
+# Nexus Business Pro 🏢
+
+This project has been created with [DeepSite](https://deepsite.hf.co) AI Vibe Coding.

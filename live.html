@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tactical Legends — Live Stream & Quiz</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            cinzel: ['Cinzel', 'serif'],
+            inter: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            nexus: {
+              gold: '#D4A847',
+              amber: '#F59E0B',
+              dark: '#0A0A0F',
+              deeper: '#06060A',
+              card: '#111118',
+              border: '#1F1F2E',
+              muted: '#6B7280',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { background: #0A0A0F; color: #e5e7eb; font-family: 'Inter', sans-serif; overflow-x: hidden; }
+
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #0A0A0F; }
+    ::-webkit-scrollbar-thumb { background: #D4A847; border-radius: 3px; }
+
+    .nav-blur {
+      backdrop-filter: blur(16px) saturate(180%);
+      -webkit-backdrop-filter: blur(16px) saturate(180%);
+    }
+
+    .tactical-grid {
+      background-image:
+        linear-gradient(rgba(212,168,71,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(212,168,71,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+
+    .glow-text {
+      text-shadow: 0 0 40px rgba(212,168,71,0.3), 0 0 80px rgba(212,168,71,0.1);
+    }
+
+    .glow-border {
+      box-shadow: 0 0 15px rgba(212,168,71,0.1), inset 0 0 15px rgba(212,168,71,0.05);
+    }
+
+    .shimmer {
+      background: linear-gradient(110deg, transparent 30%, rgba(212,168,71,0.05) 50%, transparent 70%);
+      background-size: 200% 100%;
+      animation: shimmer 3s infinite;
+    }
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    .compass-spin {
+      animation: compassSpin 20s linear infinite;
+    }
+    @keyframes compassSpin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes pulseRing {
+      0% { transform: scale(0.8); opacity: 0.6; }
+      100% { transform: scale(2); opacity: 0; }
+    }
+
+    .fade-up {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .fade-up.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Chat scroll */
+    .chat-messages {
+      scrollbar-width: thin;
+      scrollbar-color: #D4A84733 transparent;
+    }
+    .chat-messages::-webkit-scrollbar { width: 4px; }
+    .chat-messages::-webkit-scrollbar-track { background: transparent; }
+    .chat-messages::-webkit-scrollbar-thumb { background: #D4A84733; border-radius: 2px; }
+
+    /* Live pulse */
+    .live-pulse {
+      animation: livePulse 1.5s ease-in-out infinite;
+    }
+    @keyframes livePulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    /* Quiz option hover */
+    .quiz-option {
+      transition: all 0.3s ease;
+    }
+    .quiz-option:hover:not(.disabled) {
+      border-color: rgba(212,168,71,0.5);
+      background: rgba(212,168,71,0.08);
+      transform: translateX(4px);
+    }
+    .quiz-option.correct {
+      border-color: #22c55e !important;
+      background: rgba(34,197,94,0.15) !important;
+    }
+    .quiz-option.wrong {
+      border-color: #ef4444 !important;
+      background: rgba(239,68,68,0.15) !important;
+    }
+    .quiz-option.disabled {
+      pointer-events: none;
+      opacity: 0.5;
+    }
+    .quiz-option.disabled.correct {
+      opacity: 1;
+    }
+
+    /* Progress bar */
+    .quiz-progress-bar {
+      transition: width 0.5s ease;
+    }
+
+    /* Stream wave */
+    .stream-wave {
+      animation: streamWave 2s ease-in-out infinite;
+    }
+    @keyframes streamWave {
+      0%, 100% { height: 8px; }
+      50% { height: 20px; }
+    }
+
+    /* Chat message entrance */
+    .chat-msg-enter {
+      animation: chatMsgIn 0.3s ease-out;
+    }
+    @keyframes chatMsgIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Score pop */
+    .score-pop {
+      animation: scorePop 0.5s ease-out;
+    }
+    @keyframes scorePop {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.3); color: #D4A847; }
+      100% { transform: scale(1); }
+    }
+
+    /* Viewer count flicker */
+    .viewer-flicker {
+      animation: viewerFlicker 3s ease-in-out infinite;
+    }
+    @keyframes viewerFlicker {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="fixed top-0 left-0 right-0 z-50 nav-blur bg-nexus-dark/80 border-b border-nexus-border/50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <a href="index.html" class="flex items-center gap-3">
+          <svg viewBox="0 0 32 32" class="w-8 h-8">
+            <polygon points="16,2 28,9 28,23 16,30 4,23 4,9" fill="none" stroke="#D4A847" stroke-width="1.5"/>
+            <polygon points="16,8 22,12 22,20 16,24 10,20 10,12" fill="rgba(212,168,71,0.15)" stroke="#D4A847" stroke-width="1"/>
+            <circle cx="16" cy="16" r="2" fill="#D4A847"/>
+          </svg>
+          <span class="font-cinzel font-bold text-nexus-gold text-sm tracking-[0.2em]">TACTICAL LEGENDS</span>
+        </a>
+        <div class="hidden md:flex items-center gap-8">
+          <a href="index.html" class="text-sm text-gray-400 hover:text-nexus-gold transition-colors duration-300 tracking-wide">Home</a>
+          <a href="index.html#synopsis" class="text-sm text-gray-400 hover:text-nexus-gold transition-colors duration-300 tracking-wide">Synopsis</a>
+          <a href="index.html#characters" class="text-sm text-gray-400 hover:text-nexus-gold transition-colors duration-300 tracking-wide">Characters</a>
+          <a href="live.html" class="text-sm text-nexus-gold transition-colors duration-300 tracking-wide flex items-center gap-2">
+            <span class="w-1.5 h-1.5 rounded-full bg-red-500 live-pulse"></span>Live
+          </a>
+        </div>
+        <button id="mobileMenuBtn" class="md:hidden text-gray-400 hover:text-nexus-gold transition-colors">
+          <i data-lucide="menu" class="w-6 h-6"></i>
+        </button>
+      </div>
+    </div>
+    <div id="mobileMenu" class="hidden md:hidden bg-nexus-dark/95 nav-blur border-t border-nexus-border/50">
+      <div class="px-4 py-4 flex flex-col gap-3">
+        <a href="index.html" class="text-sm text-gray-400 hover:text-nexus-gold py-2 tracking-wide">Home</a>
+        <a href="live.html" class="text-sm text-nexus-gold py-2 tracking-wide flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-red-500 live-pulse"></span>Live Stream & Quiz</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ========== MAIN LAYOUT ========== -->
+  <main class="pt-16 min-h-screen">
+    <div class="max-w-[1600px] mx-auto flex flex-col lg:flex-row">
+
+      <!-- ===== LEFT: Stream + Quiz ===== -->
+      <div class="flex-1 min-w-0">
+
+        <!-- LIVE STREAM SECTION -->
+        <section class="relative">
+          <!-- Stream Player -->
+          <div class="relative aspect-video bg-nexus-deeper overflow-hidden">
+            <img src="http://static.photos/aerial/1200x630/55" alt="Tactical Legends Live Stream" class="w-full h-full object-cover opacity-50"/>
+            <div class="absolute inset-0 bg-gradient-to-t from-nexus-dark via-nexus-dark/30 to-transparent"></div>
+            <div class="shimmer absolute inset-0 pointer-events-none"></div>
+
+            <!-- Stream overlay elements -->
+            <div class="absolute top-4 left-4 flex items-center gap-3 z-10">
+              <div class="flex items-center gap-1.5 px-3 py-1 rounded bg-red-600/90 text-white text-xs font-bold tracking-wider">
+                <span class="w-1.5 h-1.5 rounded-full bg-white live-pulse"></span>
+                LIVE
+              </div>
+              <div class="flex items-center gap-1.5 px-3 py-1 rounded bg-nexus-dark/70 text-gray-300 text-xs font-mono viewer-flicker">
+                <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+                <span id="viewerCount">12,847</span>
+              </div>
+            </div>
+
+            <!-- Stream audio visualizer -->
+            <div class="absolute bottom-4 left-4 flex items-end gap-[3px] z-10 h-6">
+              <div class="w-[3px] bg-nexus-gold/60 rounded-full stream-wave" style="animation-delay: 0s;"></div>
+              <div class="w-[3px] bg-nexus-gold/60 rounded-full stream-wave" style="animation-delay: 0.15s;"></div>
+              <div class="w-[3px] bg-nexus-gold/60 rounded-full stream-wave" style="animation-delay: 0.3s;"></div>
+              <div class="w-[3px] bg-nexus-gold/60 rounded-full stream-wave" style="animation-delay: 0.45s;"></div>
+              <div class="w-[3px] bg-nexus-gold/60 rounded-full stream-wave" style="animation-delay: 0.6s;"></div>
+              <div class="w-[3px] bg-nexus-gold/40 rounded-full stream-wave" style="animation-delay: 0.75s;"></div>
+              <div class="w-[3px] bg-nexus-gold/40 rounded-full stream-wave" style="animation-delay: 0.9s;"></div>
+            </div>
+
+            <!-- Play overlay -->
+            <div id="streamPlayOverlay" class="absolute inset-0 flex items-center justify-center z-20 cursor-pointer bg-black/30 hover:bg-black/20 transition-colors">
+              <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-nexus-gold/10 border-2 border-nexus-gold/50 flex items-center justify-center hover:scale-110 transition-transform">
+                <i data-lucide="play" class="w-8 h-8 sm:w-10 sm:h-10 text-nexus-gold ml-1"></i>
+              </div>
+            </div>
+
+            <!-- Stream is playing state -->
+            <div id="streamPlaying" class="hidden absolute inset-0 flex items-center justify-center z-20">
+              <div class="text-center">
+                <div class="w-24 h-24 rounded-full border border-nexus-gold/20 flex items-center justify-center mx-auto mb-4">
+                  <i data-lucide="radio" class="w-10 h-10 text-nexus-gold animate-pulse"></i>
+                </div>
+                <h3 class="font-cinzel text-xl sm:text-2xl font-bold text-white mb-1">Tactical Legends Live</h3>
+                <p class="text-sm text-gray-400">Exclusive behind-the-scenes & lore deep dive</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Stream Info Bar -->
+          <div class="bg-nexus-card border-b border-nexus-border/50 px-4 sm:px-6 py-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <h2 class="font-cinzel text-lg sm:text-xl font-bold text-white flex items-center gap-2">
+                  <i data-lucide="radio" class="w-5 h-5 text-nexus-gold"></i>
+                  Tactical Legends — Lore & Strategy Live
+                </h2>
+                <p class="text-sm text-gray-500 mt-1">Exclusive stream · Faction reveals · Live Q&A</p>
+              </div>
+              <div class="flex items-center gap-3">
+                <button id="followBtn" class="flex items-center gap-2 px-4 py-2 bg-nexus-gold/10 border border-nexus-gold/30 text-nexus-gold text-sm rounded hover:bg-nexus-gold/20 transition-all">
+                  <i data-lucide="bell" class="w-4 h-4"></i>
+                  Follow
+                </button>
+                <button class="flex items-center gap-2 px-4 py-2 bg-nexus-card border border-nexus-border/50 text-gray-400 text-sm rounded hover:border-nexus-gold/30 hover:text-nexus-gold transition-all">
+                  <i data-lucide="share-2" class="w-4 h-4"></i>
+                  Share
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- QUIZ SECTION -->
+        <section class="relative bg-nexus-dark border-t border-nexus-border/30">
+          <div class="absolute inset-0 tactical-grid opacity-20 pointer-events-none"></div>
+
+          <div class="relative px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+            <!-- Quiz Header -->
+            <div class="fade-up flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+              <div>
+                <div class="flex items-center gap-2 mb-2">
+                  <div class="h-px w-8 bg-nexus-gold/40"></div>
+                  <span class="text-xs font-medium tracking-[0.3em] text-nexus-gold/60 uppercase">Interactive</span>
+                  <div class="h-px w-8 bg-nexus-gold/40"></div>
+                </div>
+                <h2 class="font-cinzel text-2xl sm:text-3xl font-bold text-white tracking-wide flex items-center gap-3">
+                  <i data-lucide="sword" class="w-6 h-6 text-nexus-gold"></i>
+                  Lore Quiz
+                </h2>
+                <p class="text-sm text-gray-500 mt-1">Test your knowledge of the Tactical Legends universe</p>
+              </div>
+              <div class="flex items-center gap-4">
+                <div class="flex items-center gap-2 px-4 py-2 bg-nexus-card border border-nexus-border/50 rounded-lg">
+                  <i data-lucide="trophy" class="w-5 h-5 text-nexus-gold"></i>
+                  <span class="font-mono text-lg font-bold text-white" id="quizScore">0</span>
+                  <span class="text-xs text-gray-500">pts</span>
+                </div>
+                <div class="flex items-center gap-2 px-4 py-2 bg-nexus-card border border-nexus-border/50 rounded-lg">
+                  <i data-lucide="flame" class="w-5 h-5 text-orange-400"></i>
+                  <span class="font-mono text-lg font-bold text-white" id="quizStreak">0</span>
+                  <span class="text-xs text-gray-500">streak</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="fade-up mb-8">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-mono text-gray-500">Question <span id="currentQ">1</span> of <span id="totalQ">10</span></span>
+                <span class="text-xs font-mono text-nexus-gold/60" id="quizTimer">0:15</span>
+              </div>
+              <div class="h-1.5 bg-nexus-card rounded-full overflow-hidden">
+                <div class="quiz-progress-bar h-full bg-gradient-to-r from-nexus-gold to-nexus-amber rounded-full" style="width: 10%;" id="quizProgressBar"></div>
+              </div>
+            </div>
+
+            <!-- Quiz Content -->
+            <div id="quizContent" class="fade-up">
+              <!-- Question Card -->
+              <div class="bg-nexus-card border border-nexus-border/40 rounded-xl p-6 sm:p-8 mb-6 glow-border">
+                <div class="flex items-start gap-3 mb-6">
+                  <div class="flex-shrink-0 w-8 h-8 rounded-lg bg-nexus-gold/10 border border-nexus-gold/20 flex items-center justify-center">
+                    <span class="font-mono text-sm font-bold text-nexus-gold" id="qNumber">01</span>
+                  </div>
+                  <h3 class="font-cinzel text-lg sm:text-xl font-semibold text-white leading-relaxed" id="questionText">
+                    What is the last remaining source of pure energy in the world of Tactical Legends?
+                  </h3>
+                </div>
+
+                <!-- Answer Options -->
+                <div class="space-y-3" id="answerOptions">
+                  <button class="quiz-option w-full flex items-center gap-4 p-4 rounded-lg border border-nexus-border/40 bg-nexus-deeper/50 text-left" data-answer="0">
+                    <span class="flex-shrink-0 w-7 h-7 rounded-full border border-nexus-border/50 flex items-center justify-center text-xs font-mono text-gray-500">A</span>
+                    <span class="text-gray-300" id="optionA">The Eternal Flame</span>
+                  </button>
+                  <button class="quiz-option w-full flex items-center gap-4 p-4 rounded-lg border border-nexus-border/40 bg-nexus-deeper/50 text-left" data-answer="1">
+                    <span class="flex-shrink-0 w-7 h-7 rounded-full border border-nexus-border/50 flex items-center justify-center text-xs font-mono text-gray-500">B</span>
+                    <span class="text-gray-300" id="optionB">The Nexus Core</span>
+                  </button>
+                  <button class="quiz-option w-full flex items-center gap-4 p-4 rounded-lg border border-nexus-border/40 bg-nexus-deeper/50 text-left" data-answer="2">
+                    <span class="flex-shrink-0 w-7 h-7 rounded-full border border-nexus-border/50 flex items-center justify-center text-xs font-mono text-gray-500">C</span>
+                    <span class="text-gray-300" id="optionC">The Astral Beacon</span>
+                  </button>
+                  <button class="quiz-option w-full flex items-center gap-4 p-4 rounded-lg border border-nexus-border/40 bg-nexus-deeper/50 text-left" data-answer="3">
+                    <span class="flex-shrink-0 w-7 h-7 rounded-full border border-nexus-border/50 flex items-center justify-center text-xs font-mono text-gray-500">D</span>
+                    <span class="text-gray-300" id="optionD">The Void Crystal</span>
+                  </button>
+                </div>
+
+                <!-- Answer Feedback -->
+                <div id="answerFeedback" class="hidden mt-5 p-4 rounded-lg border text-sm"></div>
+              </div>
+
+              <!-- Next Button -->
+              <div class="flex justify-end">
+                <button id="nextQuestionBtn" class="hidden items-center gap-2 px-6 py-3 bg-nexus-gold text-nexus-dark font-semibold rounded hover:bg-nexus-amber transition-all text-sm tracking-wide">
+                  Next Question
+                  <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Quiz Results (hidden initially) -->
+            <div id="quizResults" class="hidden">
+              <div class="bg-nexus-card border border-nexus-border/40 rounded-xl p-8 sm:p-12 text-center glow-border">
+                <div class="w-20 h-20 rounded-full bg-nexus-gold/10 border border-nexus-gold/30 flex items-center justify-center mx-auto mb-6">
+                  <i data-lucide="crown" class="w-10 h-10 text-nexus-gold"></i>
+                </div>
+                <h3 class="font-cinzel text-3xl sm:text-4xl font-bold text-white mb-2" id="resultTitle">Legend Rank</h3>
+                <p class="text-gray-400 mb-6" id="resultDesc">Your tactical knowledge has been measured.</p>
+
+                <div class="grid grid-cols-3 gap-4 max-w-sm mx-auto mb-8">
+                  <div class="p-4 rounded-lg bg-nexus-deeper border border-nexus-border/30">
+                    <div class="font-mono text-2xl font-bold text-nexus-gold" id="finalScore">0</div>
+                    <div class="text-[10px] text-gray-500 tracking-widest uppercase mt-1">Score</div>
+                  </div>
+                  <div class="p-4 rounded-lg bg-nexus-deeper border border-nexus-border/30">
+                    <div class="font-mono text-2xl font-bold text-green-400" id="correctCount">0</div>
+                    <div class="text-[10px] text-gray-500 tracking-widest uppercase mt-1">Correct</div>
+                  </div>
+                  <div class="p-4 rounded-lg bg-nexus-deeper border border-nexus-border/30">
+                    <div class="font-mono text-2xl font-bold text-orange-400" id="bestStreak">0</div>
+                    <div class="text-[10px] text-gray-500 tracking-widest uppercase mt-1">Best Streak</div>
+                  </div>
+                </div>
+
+                <button id="retryQuiz" class="px-8 py-3 bg-nexus-gold text-nexus-dark font-semibold rounded hover:bg-nexus-amber transition-all tracking-wide">
+                  Play Again
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- ===== RIGHT: Chat Sidebar ===== -->
+      <aside class="w-full lg:w-[380px] xl:w-[420px] flex-shrink-0 bg-nexus-deeper border-l border-nexus-border/30 flex flex-col h-[calc(100vh-4rem)] lg:sticky lg:top-16 overflow-hidden">
+
+        <!-- Chat Header -->
+        <div class="px-4 py-3 border-b border-nexus-border/30 flex items-center justify-between flex-shrink-0">
+          <div class="flex items-center gap-2">
+            <i data-lucide="message-circle" class="w-4 h-4 text-nexus-gold"></i>
+            <span class="text-sm font-semibold text-white">Live Chat</span>
+            <span class="px-2 py-0.5 rounded-full text-[10px] bg-nexus-gold/10 text-nexus-gold border border-nexus-gold/20" id="chatUserCount">2.4K</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <button id="chatSettingsBtn" class="text-gray-500 hover:text-nexus-gold transition-colors">
+              <i data-lucide="settings" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Chat Messages -->
+        <div class="flex-1 overflow-y-auto px-4 py-3 space-y-3 chat-messages" id="chatMessages">
+          <!-- System message -->
+          <div class="text-center py-2">
+            <span class="text-[11px] text-gray-600 bg-nexus-card/50 px-3 py-1 rounded-full">Welcome to the Tactical Legends live chat</span>
+          </div>
+        </div>
+
+        <!-- Chat Input -->
+        <div class="px-4 py-3 border-t border-nexus-border/30 flex-shrink-0">
+          <!-- Username setup (shown first) -->
+          <div id="chatUsernameSetup" class="mb-3">
+            <div class="flex gap-2">
+              <input type="text" id="usernameInput" placeholder="Choose a username..." class="flex-1 px-3 py-2 bg-nexus-card border border-nexus-border/50 rounded text-sm text-gray-300 placeholder-gray-600 focus:outline-none focus:border-nexus-gold/40 transition-colors" maxlength="20"/>
+              <button id="joinChatBtn" class="px-4 py-2 bg-nexus-gold text-nexus-dark font-semibold rounded text-sm hover:bg-nexus-amber transition-colors">
+                Join
+              </button>
+            </div>
+          </div>
+
+          <!-- Message input (hidden until joined) -->
+          <div id="chatInputArea" class="hidden">
+            <div class="flex gap-2">
+              <div class="flex-1 relative">
+                <input type="text" id="chatInput" placeholder="Type a message..." class="w-full px-3 py-2 pr-10 bg-nexus-card border border-nexus-border/50 rounded text-sm text-gray-300 placeholder-gray-600 focus:outline-none focus:border-nexus-gold/40 transition-colors" maxlength="200"/>
+                <button id="emojiBtn" class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-600 hover:text-nexus-gold transition-colors">
+                  <i data-lucide="smile" class="w-4 h-4"></i>
+                </button>
+              </div>
+              <button id="sendBtn" class="px-4 py-2 bg-nexus-gold/10 border border-nexus-gold/30 text-nexus-gold rounded hover:bg-nexus-gold/20 transition-all">
+                <i data-lucide="send" class="w-4 h-4"></i>
+              </button>
+            </div>
+            <div id="emojiPicker" class="hidden mt-2 p-2 bg-nexus-card border border-nexus-border/50 rounded-lg grid grid-cols-8 gap-1">
+              <button class="emoji-btn p-1.5 hover:bg-nexus-gold/10 rounded text-lg transition-colors">⚔️</button>
+              <button class="emoji-btn p-1.5 hover:bg-nexus-gold/10 rounded text-lg transition-colors">🛡️</button>
+              <button class="emoji-btn p-1.5 hover:bg-nexus-gold/10 rounded text-lg transition-colors">🔮</button>
+              <button class="emoji-btn p-1.5 hover:bg-nexus-gold/10 rounded text-lg transition-colors">👑</button>
+              <button class="emoji-btn p-1.5 hover:bg-nexus-gold/10 rounded text-lg transition-colors">⚡</button>
+              <button class="emoji-btn p-1.5 hover:bg-nexus-gold/10 rounded text-lg transition-colors">🗡️</button>
+              <button class="emoji-btn p-1.5 hover:bg-nexus-gold/10 rounded text-lg transition-colors">🔥</button>
+              <button class="emoji-btn p-1.5 hover:bg-nexus-gold/10 rounded text-lg transition-colors">💀</button>
+              <button class="emoji-btn p-1.5 hover:bg-nexus-gold/10 rounded text-lg transition-colors">🎯</button>
+              <button class="emoji-btn p-1.5 hover:bg-nexus-gold/10 rounded text-lg transition-colors">🐉</button>
+              <button class="emoji-btn p-1.5 hover:bg-nexus-gold/10 rounded text-lg transition-colors">✨</button>
+              <button class="emoji-btn p-1.5 hover:bg-nexus-gold/10 rounded text-lg transition-colors">🌑</button>
+              <button class="emoji-btn p-1.5 hover:bg-nexus-gold/10 rounded text-lg transition-colors">🗡️</button>
+              <button class="emoji-btn p-1.5 hover:bg-nexus-gold/10 rounded text-lg transition-colors">🧠</button>
+              <button class="emoji-btn p-1.5 hover:bg-nexus-gold/10 rounded text-lg transition-colors">💪</button>
+              <button class="emoji-btn p-1.5 hover:bg-nexus-gold/10 rounded text-lg transition-colors">🏆</button>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <!-- ========== SCRIPTS ========== -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    lucide.createIcons();
+
+    // ===== Mobile Menu =====
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileMenu = document.getElementById('mobileMenu');
+    let menuOpen = false;
+
+    mobileMenuBtn.addEventListener('click', () => {
+      menuOpen = !menuOpen;
+      mobileMenu.classList.toggle('hidden');
+    });
+
+    // ===== Scroll Animations =====
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) entry.target.classList.add('visible');
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+    // ===== Stream Play =====
+    const streamPlayOverlay = document.getElementById('streamPlayOverlay');
+    const streamPlaying = document.getElementById('streamPlaying');
+
+    streamPlayOverlay.addEventListener('click', () => {
+      streamPlayOverlay.classList.add('hidden');
+      streamPlaying.classList.remove('hidden');
+      streamPlaying.classList.add('flex');
+    });
+
+    // ===== Viewer Count Simulation =====
+    let viewers = 12847;
+    setInterval(() => {
+      viewers += Math.floor(Math.random() * 20) - 8;
+      if (viewers < 12000) viewers = 12000;
+      if (viewers > 15000) viewers = 15000;
+      document.getElementById('viewerCount').textContent = viewers.toLocaleString();
+    }, 3000);
+
+    // ===== Follow Button =====
+    const followBtn = document.getElementById('followBtn');
+    let following = false;
+    followBtn.addEventListener('click', () => {
+      following = !following;
+      if (following) {
+        followBtn.innerHTML = '<i data-lucide="bell-off" class="w-4 h-4"></i> Following';
+        followBtn.classList.remove('bg-nexus-gold/10', 'border-nexus-gold/30', 'text-nexus-gold');
+        followBtn.classList.add('bg-nexus-gold', 'border-nexus-gold', 'text-nexus-dark');
+      } else {
+        followBtn.innerHTML = '<i data-lucide="bell" class="w-4 h-4"></i> Follow';
+        followBtn.classList.add('bg-nexus-gold/10', 'border-nexus-gold/30', 'text-nexus-gold');
+        followBtn.classList.remove('bg-nexus-gold', 'border-nexus-gold', 'text-nexus-dark');
+      }
+      lucide.createIcons();
+    });
+
+    // ====================================
+    // ===== QUIZ SYSTEM =====
+    // ====================================
+    const quizData = [
+      {
+        question: "What is the last remaining source of pure energy in the world of Tactical Legends?",
+        options: ["The Eternal Flame", "The Nexus Core", "The Astral Beacon", "The Void Crystal"],
+        correct: 1,
+        explanation: "The Nexus Core is the last remaining source of pure energy — a sentient, ancient force that all factions seek to control."
+      },
+      {
+        question: "Who is the protagonist exiled from his homeland for uncovering a conspiracy?",
+        options: ["Commander Theron", "The Oracle", "Kael Ardyn", "Lyra Voss"],
+        correct: 2,
+        explanation: "Kael Ardyn is a young strategist prodigy who was exiled after discovering a conspiracy threatening eternal war."
+      },
+      {
+        question: "How are armies measured in the world of Tactical Legends?",
+        options: ["By their sheer numbers", "By their wealth and resources", "By strategy, precision, and legendary commanders", "By their magical firepower"],
+        correct: 2,
+        explanation: "In this world, armies are measured by strategy, precision, and the legends who command them — not by size."
+      },
+      {
+        question: "What type of creatures evolve with every encounter?",
+        options: ["The Iron Sentinels", "The Shadow Born", "The Aether Wisps", "The Crimson Drakes"],
+        correct: 1,
+        explanation: "Shadow Born creatures evolve with every encounter, making them increasingly dangerous and unpredictable."
+      },
+      {
+        question: "What can Kael's mysterious artifact do?",
+        options: ["Summon ancient warriors", "Bend the battlefield itself", "Control the Shadow Born", "Absorb the Nexus Core's power"],
+        correct: 1,
+        explanation: "The artifact can bend the battlefield itself, giving Kael a unique tactical advantage in every encounter."
+      },
+      {
+        question: "According to the story, what is the true war fought with?",
+        options: ["Advanced weaponry", "Dark magic", "Decisions", "Overwhelming force"],
+        correct: 2,
+        explanation: "The true war is not fought with weapons — but with decisions. Every choice shapes the fate of nations."
+      },
+      {
+        question: "What is the greatest threat that Kael faces?",
+        options: ["Commander Theron's armies", "The Shadow Born horde", "The darkness growing within", "The Nexus Core's destruction"],
+        correct: 2,
+        explanation: "The greatest threat may not be the armies marching toward him… but the darkness growing within."
+      },
+      {
+        question: "Which faction includes rogue commanders with devastating firepower?",
+        options: ["The Iron Covenant", "The Crimson Vanguard", "The Null Sect", "Dawn Sovereignty"],
+        correct: 1,
+        explanation: "The Crimson Vanguard consists of rogue commanders with devastating firepower, led by Commander Theron."
+      },
+      {
+        question: "What does the Nexus Core amplify in those who seek to control it?",
+        options: ["Physical strength only", "Magical abilities exclusively", "Not just power, but intent", "Only dark emotions"],
+        correct: 2,
+        explanation: "The Core amplifies not just power, but intent — turning conviction into weapon, and doubt into destruction."
+      },
+      {
+        question: "Tactical Legends is described as blending which three elements?",
+        options: ["Romance, horror, and comedy", "Strategy, magic-infused combat, and character-driven storytelling", "Politics, economics, and warfare", "Exploration, crafting, and survival"],
+        correct: 1,
+        explanation: "Tactical Legends blends strategy, magic-infused combat, and character-driven storytelling into a tactical epic."
+      }
+    ];
+
+    let currentQuestion = 0;
+    let score = 0;
+    let streak = 0;
+    let bestStreak = 0;
+    let correctAnswers = 0;
+    let timerInterval = null;
+    let timeLeft = 15;
+
+    const questionText = document.getElementById('questionText');
+    const optionA = document.getElementById('optionA');
+    const optionB = document.getElementById('optionB');
+    const optionC = document.getElementById('optionC');
+    const optionD = document.getElementById('optionD');
+    const qNumber = document.getElementById('qNumber');
+    const currentQEl = document.getElementById('currentQ');
+    const totalQEl = document.getElementById('totalQ');
+    const quizProgressBar = document.getElementById('quizProgressBar');
+    const quizScoreEl = document.getElementById('quizScore');
+    const quizStreakEl = document.getElementById('quizStreak');
+    const answerOptions = document.getElementById('answerOptions');
+    const answerFeedback = document.getElementById('answerFeedback');
+    const nextQuestionBtn = document.getElementById('nextQuestionBtn');
+    const quizContent = document.getElementById('quizContent');
+    const quizResults = document.getElementById('quizResults');
+    const quizTimerEl = document.getElementById('quizTimer');
+
+    totalQEl.textContent = quizData.length;
+
+    function loadQuestion() {
+      const q = quizData[currentQuestion];
+      questionText.textContent = q.question;
+      optionA.textContent = q.options[0];
+      optionB.textContent = q.options[1];
+      optionC.textContent = q.options[2];
+      optionD.textContent = q.options[3];
+      qNumber.textContent = String(currentQuestion + 1).padStart(2, '0');
+      currentQEl.textContent = currentQuestion + 1;
+      quizProgressBar.style.width = ((currentQuestion + 1) / quizData.length * 100) + '%';
+
+      // Reset options
+      answerOptions.querySelectorAll('.quiz-option').forEach(btn => {
+        btn.classList.remove('correct', 'wrong', 'disabled');
+      });
+      answerFeedback.classList.add('hidden');
+      nextQuestionBtn.classList.add('hidden');
+      nextQuestionBtn.classList.remove('flex');
+
+      // Start timer
+      timeLeft = 15;
+      quizTimerEl.textContent = '0:15';
+      clearInterval(timerInterval);
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        quizTimerEl.textContent = '0:' + String(timeLeft).padStart(2, '0');
+        if (timeLeft <= 5) {
+          quizTimerEl.classList.add('text-red-400');
+          quizTimerEl.classList.remove('text-nexus-gold/60');
+        } else {
+          quizTimerEl.classList.remove('text-red-400');
+          quizTimerEl.classList.add('text-nexus-gold/60');
+        }
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          timeUp();
+        }
+      }, 1000);
+    }
+
+    function timeUp() {
+      const q = quizData[currentQuestion];
+      // Mark all as disabled, highlight correct
+      answerOptions.querySelectorAll('.quiz-option').forEach((btn, i) => {
+        btn.classList.add('disabled');
+        if (i === q.correct) btn.classList.add('correct');
+      });
+      streak = 0;
+      quizStreakEl.textContent = streak;
+
+      answerFeedback.classList.remove('hidden');
+      answerFeedback.className = 'mt-5 p-4 rounded-lg border text-sm border-red-500/30 bg-red-500/10 text-red-300';
+      answerFeedback.innerHTML = `<div class="flex items-start gap-2"><i data-lucide="clock" class="w-4 h-4 mt-0.5 flex-shrink-0"></i><div><strong>Time's up!</strong> ${q.explanation}</div></div>`;
+      lucide.createIcons();
+
+      nextQuestionBtn.classList.remove('hidden');
+      nextQuestionBtn.classList.add('flex');
+    }
+
+    function checkAnswer(selected) {
+      clearInterval(timerInterval);
+      const q = quizData[currentQuestion];
+      const isCorrect = selected === q.correct;
+
+      // Mark options
+      answerOptions.querySelectorAll('.quiz-option').forEach((btn, i) => {
+        btn.classList.add('disabled');
+        if (i === q.correct) btn.classList.add('correct');
+        if (i === selected && !isCorrect) btn.classList.add('wrong');
+      });
+
+      if (isCorrect) {
+        const timeBonus = Math.max(1, Math.floor(timeLeft * 6.67));
+        const points = 100 + timeBonus;
+        score += points;
+        streak++;
+        if (streak > bestStreak) bestStreak = streak;
+        correctAnswers++;
+
+        quizScoreEl.textContent = score;
+        quizScoreEl.classList.add('score-pop');
+        setTimeout(() => quizScoreEl.classList.remove('score-pop'), 500);
+        quizStreakEl.textContent = streak;
+
+        answerFeedback.classList.remove('hidden');
+        answerFeedback.className = 'mt-5 p-4 rounded-lg border text-sm border-green-500/30 bg-green-500/10 text-green-300';
+        answerFeedback.innerHTML = `<div class="flex items-start gap-2"><i data-lucide="check-circle" class="w-4 h-4 mt-0.5 flex-shrink-0"></i><div><strong>Correct! +${points} pts</strong> ${q.explanation}</div></div>`;
+
+        // Send to chat
+        addSystemMessage(`🏆 Quiz Answer: Someone got it right! +${points} pts`);
+      } else {
+        streak = 0;
+        quizStreakEl.textContent = streak;
+
+        answerFeedback.classList.remove('hidden');
+        answerFeedback.className = 'mt-5 p-4 rounded-lg border text-sm border-red-500/30 bg-red-500/10 text-red-300';
+        answerFeedback.innerHTML = `<div class="flex items-start gap-2"><i data-lucide="x-circle" class="w-4 h-4 mt-0.5 flex-shrink-0"></i><div><strong>Incorrect.</strong> ${q.explanation}</div></div>`;
+      }
+
+      lucide.createIcons();
+      nextQuestionBtn.classList.remove('hidden');
+      nextQuestionBtn.classList.add('flex');
+    }
+
+    function nextQuestion() {
+      currentQuestion++;
+      if (currentQuestion >= quizData.length) {
+        showResults();
+        return;
+      }
+      loadQuestion();
+    }
+
+    function showResults() {
+      clearInterval(timerInterval);
+      quizContent.classList.add('hidden');
+      quizResults.classList.remove('hidden');
+
+      document.getElementById('finalScore').textContent = score;
+      document.getElementById('correctCount').textContent = correctAnswers;
+      document.getElementById('bestStreak').textContent = bestStreak;
+
+      const pct = (correctAnswers / quizData.length) * 100;
+      let title = 'Recruit';
+      let desc = 'The battlefield is still unfamiliar. Study the lore and try again.';
+      if (pct >= 90) { title = 'Supreme Commander'; desc = 'Your tactical knowledge is unmatched. You are ready to lead armies.'; }
+      else if (pct >= 70) { title = 'War Strategist'; desc = 'Your understanding of the realm is impressive. Few can match your insight.'; }
+      else if (pct >= 50) { title = 'Field Tactician'; desc = 'You know the basics of war. Keep studying to sharpen your edge.'; }
+      else if (pct >= 30) { title = 'Scout'; desc = 'You\'ve glimpsed the battlefield but much remains hidden. Dig deeper.'; }
+
+      document.getElementById('resultTitle').textContent = title;
+      document.getElementById('resultDesc').textContent = desc;
+    }
+
+    // Answer option click handlers
+    answerOptions.querySelectorAll('.quiz-option').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const selected = parseInt(btn.getAttribute('data-answer'));
+        checkAnswer(selected);
+      });
+    });
+
+    nextQuestionBtn.addEventListener('click', nextQuestion);
+
+    document.getElementById('retryQuiz').addEventListener('click', () => {
+      currentQuestion = 0;
+      score = 0;
+      streak = 0;
+      bestStreak = 0;
+      correctAnswers = 0;
+      quizScoreEl.textContent = 0;
+      quizStreakEl.textContent = 0;
+      quizResults.classList.add('hidden');
+      quizContent.classList.remove('hidden');
+      loadQuestion();
+    });
+
+    // Initialize quiz
+    loadQuestion();
+
+    // ====================================
+    // ===== CHAT SYSTEM =====
+    // ====================================
+    const chatMessages = document.getElementById('chatMessages');
+    const chatInput = document.getElementById('chatInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const usernameInput = document.getElementById('usernameInput');
+    const joinChatBtn = document.getElementById('joinChatBtn');
+    const chatUsernameSetup = document.getElementById('chatUsernameSetup');
+    const chatInputArea = document.getElementById('chatInputArea');
+    const emojiBtn = document.getElementById('emojiBtn');
+    const emojiPicker = document.getElementById('emojiPicker');
+    const chatUserCountEl = document.getElementById('chatUserCount');
+
+    let username = '';
+
+    // Chat color palette
+    const chatColors = [
+      '#D4A847', '#F59E0B', '#22C55E', '#3B82F6', '#A855F7',
+      '#EC4899', '#EF4444', '#14B8A6', '#F97316', '#8B5CF6'
+    ];
+
+    function getUserColor(name) {
+      let hash = 0;
+      for (let i = 0; i < name.length; i++) {
+        hash = name.charCodeAt(i) + ((hash << 5) - hash);
+      }
+      return chatColors[Math.abs(hash) % chatColors.length];
+    }
+
+    function formatTime() {
+      const now = new Date();
+      return now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+    }
+
+    function addChatMessage(user, text, isSystem = false) {
+      const msgDiv = document.createElement('div');
+      msgDiv.classList.add('chat-msg-enter');
+
+      if (isSystem) {
+        msgDiv.className = 'text-center py-1';
+        msgDiv.innerHTML = `<span class="text-[11px] text-gray-600 bg-nexus-card/50 px-3 py-1 rounded-full">${text}</span>`;
+      } else {
+        const color = getUserColor(user);
+        msgDiv.className = 'chat-msg-enter flex items-start gap-2 group';
+        msgDiv.innerHTML = `
+          <div class="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold mt-0.5" style="background: ${color}20; color: ${color}; border: 1px solid ${color}40;">${user.charAt(0).toUpperCase()}</div>
+          <div class="min-w-0 flex-1">
+            <div class="flex items-baseline gap-2">
+              <span class="text-xs font-semibold truncate" style="color: ${color};">${user}</span>
+              <span class="text-[10px] text-gray-600">${formatTime()}</span>
+            </div>
+            <p class="text-sm text-gray-300 break-words">${text}</p>
+          </div>
+        `;
+      }
+
+      chatMessages.appendChild(msgDiv);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function addSystemMessage(text) {
+      addChatMessage('', text, true);
+    }
+
+    // Simulated chat users
+    const simulatedUsers = [
+      'NexusWarden', 'ShadowHunter', 'IronCovenant', 'AetherBlade',
+      'CrimsonEcho', 'DawnSeeker', 'VoidWalker', 'TacticalMage',
+      'CoreGuardian', 'LegendForger', 'BattleSage', 'RuneKeeper'
+    ];
+
+    const simulatedMessages = [
+      'The Nexus Core scene was incredible!',
+      'Kael Ardyn is such a compelling character ⚔️',
+      'Shadow Born terrify me honestly',
+      'That strategy twist was next level 🧠',
+      'Commander Theron vs Kael when??',
+      'The artifact can bend the BATTLEFIELD?!',
+      'This lore goes so deep 🔮',
+      'Faction 7 must be hiding something',
+      'The Oracle knows more than she lets on',
+      'Darkness growing within... chills',
+      'Every decision matters in this universe',
+      'Who else thinks Lyra deserves her own spinoff?',
+      'The chess match metaphor is perfect',
+      'IMAX is the only way to watch this',
+      'That Nexus Core energy visualization though ✨',
+      'I need to rewatch the trailer immediately',
+      'Tactical combat + magic = perfection',
+      'The Null Sect erasing histories is terrifying',
+      'Best tactical epic since forever',
+      'The Verdant Reclaimers are underrated'
+    ];
+
+    // Join chat
+    joinChatBtn.addEventListener('click', () => {
+      const name = usernameInput.value.trim();
+      if (!name) return;
+      username = name;
+      chatUsernameSetup.classList.add('hidden');
+      chatInputArea.classList.remove('hidden');
+      addSystemMessage(`${username} has joined the chat`);
+      lucide.createIcons();
+    });
+
+    usernameInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') joinChatBtn.click();
+    });
+
+    // Send message
+    function sendMessage() {
+      const text = chatInput.value.trim();
+      if (!text || !username) return;
+      addChatMessage(username, text);
+      chatInput.value = '';
+    }
+
+    sendBtn.addEventListener('click', sendMessage);
+    chatInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') sendMessage();
+    });
+
+    // Emoji picker
+    emojiBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      emojiPicker.classList.toggle('hidden');
+    });
+
+    document.querySelectorAll('.emoji-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        chatInput.value += btn.textContent.trim();
+        chatInput.focus();
+      });
+    });
+
+    document.addEventListener('click', () => {
+      emojiPicker.classList.add('hidden');
+    });
+
+    // Auto simulated messages
+    let msgIndex = 0;
+    function simulateMessage() {
+      const user = simulatedUsers[Math.floor(Math.random() * simulatedUsers.length)];
+      const msg = simulatedMessages[msgIndex % simulatedMessages.length];
+      msgIndex++;
+      addChatMessage(user, msg);
+    }
+
+    // Initial messages
+    setTimeout(() => addChatMessage('NexusWarden', 'Hey everyone! Welcome to the stream! ⚔️'), 1000);
+    setTimeout(() => addChatMessage('ShadowHunter', 'The lore in this universe is insane'), 2500);
+    setTimeout(() => addChatMessage('IronCovenant', 'Just joined, what did I miss?'), 4000);
+    setTimeout(() => addChatMessage('AetherBlade', 'The Nexus Core reveal was 🔮✨'), 6000);
+
+    // Continuous simulated chat
+    setInterval(() => {
+      if (Math.random() > 0.3) {
+        simulateMessage();
+      }
+    }, 4000);
+
+    // Update chat user count periodically
+    setInterval(() => {
+      const count = (2.0 + Math.random() * 0.8).toFixed(1);
+      chatUserCountEl.textContent = count + 'K';
+    }, 8000);
+
+    // Keyboard shortcut for quiz
+    document.addEventListener('keydown', (e) => {
+      if (document.activeElement === chatInput || document.activeElement === usernameInput) return;
+      const keyMap = { '1': 0, '2': 1, '3': 2, '4': 3, 'a': 0, 'b': 1, 'c': 2, 'd': 3 };
+      if (keyMap[e.key.toLowerCase()] !== undefined) {
+        const options = answerOptions.querySelectorAll('.quiz-option:not(.disabled)');
+        if (options.length > 0) {
+          const idx = keyMap[e.key.toLowerCase()];
+          options[idx]?.click();
+        }
+      }
+    });
+  </script>
+</body>
+</html>
